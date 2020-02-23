@@ -5,8 +5,7 @@ jobs:
   build-and-test:
     docker:
       - image: docker:17.05.0-ce-git
-    executor:
-      name: node/default
+      - image: circleci/node:latest
     steps:
       - checkout
       - node/with-cache:
