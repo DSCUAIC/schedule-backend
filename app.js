@@ -46,11 +46,14 @@ const logStream = rfs('access_logs.log', {
   path: path.join(__dirname, 'logs', 'access')
 })
 
-const config = dotenv.config({
+let config = dotenv.config({
   path: path.join(__dirname, 'configs', `${process.env.NODE_ENV || 'dev'}.env`)
 }).parsed
 
-const PORT = process.env.PORT || config.PORT
+config = {
+  PORT: process.env.PORT || config.PORT,
+  DB_URI: process.env.DB_URI || config.DB_URI
+}
 
 const app = express()
 
@@ -88,6 +91,6 @@ app.use((error, req, res, next) => {
   return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error })
 })
 
-app.listen(PORT, () =>
-  logger.info(`Schedule app is now listening on port ${PORT}`)
+app.listen(config.PORT, () =>
+  logger.info(`Schedule app is now listening on port ${config.PORT}`)
 )
