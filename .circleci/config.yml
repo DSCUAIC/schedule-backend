@@ -13,6 +13,9 @@ jobs:
             - run: npm run lint
             - run: npm run depcheck
             - run: make build
+            - run:
+                name: Install Docker client
+                command: apk add docker-cli
 workflows:
     build-and-test:
       jobs:
