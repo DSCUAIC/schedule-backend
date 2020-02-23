@@ -4,7 +4,6 @@ orbs:
 jobs:
   build-and-test:
     docker:
-      - image: docker:17.05.0-ce-git
       - image: circleci/node:latest
     steps:
       - checkout
