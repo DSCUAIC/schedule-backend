@@ -4,7 +4,7 @@
   "description": "The official package of the schedule backend api",
   "main": "index.js",
   "scripts": {
-    "start": "npm run dev",
+    "start": "NODE_ENV=dev node app.js",
     "dev": "NODE_ENV=dev nodemon app.js",
     "prod": "NODE_ENV=prod node app.js",
     "depcheck": "depcheck .",
