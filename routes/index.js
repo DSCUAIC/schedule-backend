@@ -4,6 +4,8 @@ const HttpStatus = require('http-status-codes')
 const users = require('./users')
 const auth = require('./auth')
 
+const { requireAuth } = require('../middlewares')
+
 router.get('/', (req, res) => {
   return res.status(HttpStatus.OK).json({
     status: 'active'
@@ -12,7 +14,7 @@ router.get('/', (req, res) => {
 
 router.use('/auth', auth)
 
-app.use(requireAuth())
+router.use(requireAuth())
 
 router.use('/users', users)
 
