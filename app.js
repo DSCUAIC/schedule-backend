@@ -17,8 +17,7 @@ require('winston-daily-rotate-file')
 const {
   setLogger,
   setConfig,
-  setDatabase,
-  requireAuth
+  setDatabase
 } = require('./middlewares')
 const models = require('./models')
 const router = require('./routes')
@@ -75,7 +74,6 @@ app.use(morgan('tiny', { stream: logStream }))
 app.use(setLogger(logger))
 app.use(setConfig(config))
 app.use(setDatabase(models))
-app.use(requireAuth())
 app.use('/', router)
 
 // 404

@@ -10,7 +10,10 @@ router.get('/', (req, res) => {
   })
 })
 
-router.use('/users', users)
 router.use('/auth', auth)
+
+app.use(requireAuth())
+
+router.use('/users', users)
 
 module.exports = router
