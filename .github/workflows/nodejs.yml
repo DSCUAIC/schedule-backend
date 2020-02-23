@@ -21,6 +21,5 @@ jobs:
     - run: npm run lint
     - run: npm run depcheck
     - run: npm run test --if-present
-    - run: make build
       env:
         CI: true
