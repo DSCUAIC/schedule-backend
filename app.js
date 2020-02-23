@@ -63,7 +63,7 @@ mongoose
     useUnifiedTopology: true
   })
   .then(() => {
-    logger.info('Connected to database')
+    logger.info('Connected successfully to database')
   })
 
 // Middlewares
