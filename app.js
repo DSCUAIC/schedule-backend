@@ -51,7 +51,8 @@ let config = dotenv.config({
 
 config = {
   PORT: process.env.PORT || config.PORT,
-  DB_URI: process.env.DB_URI || config.DB_URI
+  DB_URI: process.env.DB_URI || config.DB_URI,
+  JWT_KEY: process.env.JWT_KEY || config.JWT_KEY
 }
 
 const app = express()
