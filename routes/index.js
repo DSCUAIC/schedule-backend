@@ -3,6 +3,7 @@ const HttpStatus = require('http-status-codes')
 
 const users = require('./users')
 const auth = require('./auth')
+const schedule = require('./schedule')
 
 const { requireAuth } = require('../middlewares')
 
@@ -17,5 +18,7 @@ router.use('/auth', auth)
 router.use(requireAuth())
 
 router.use('/users', users)
+
+router.use('/schedule', schedule)
 
 module.exports = router
