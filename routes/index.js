@@ -18,7 +18,6 @@ router.use('/auth', auth)
 router.use(requireAuth())
 
 router.use('/users', users)
-
 router.use('/schedule', schedule)
 
 module.exports = router
