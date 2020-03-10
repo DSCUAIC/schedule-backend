@@ -27,12 +27,9 @@ exports.getRoomSchedule = async (req, res) => {
         }
       }
     }
-<<<<<<< HEAD
-=======
 
     return res.status(HttpStatus.OK).json(result)
   } catch (error) {
     return res.send(error)
   }
->>>>>>> Fixed lint
 }
