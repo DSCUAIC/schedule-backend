@@ -1,6 +1,11 @@
 const HttpStatus = require('http-status-codes')
 const fs = require('fs').promises
 
+const getSchedule = async path => {
+  const schedule = await fs.readFile(path)
+  return JSON.parse(schedule)
+}
+
 exports.getRoomSchedule = async (req, res) => {
   try {
     return res.status(HttpStatus.OK).json(req.query.r)
@@ -11,14 +16,23 @@ exports.getYearSchedule = async (req, res) => {
   try {
     const { yearNumber } = req.params
 
-    let schedule = await fs.readFile('./data/schedule.json')
-    schedule = JSON.parse(schedule)
+    const schedule = await getSchedule('./data/schedule.json')
 
-    return res.status(HttpStatus.OK).json({
-      success: true,
-      schedule: schedule[yearNumber]
-    })
+    if (schedule[yearNumber]) {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        schedule: schedule[yearNumber]
+      })
+    } else {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'Invalid year number'
+      })
+    }
   } catch (error) {
     console.log(error)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
   }
 }
