@@ -9,8 +9,8 @@ exports.getRoomSchedule = async (req, res) => {
 
 exports.getYearSemesterSchedule = async (req, res) => {
   try {
-    const  yearNumber  = req.params.yearNumber
-    const semesterNumber = req.params.semesterNumber;
+    const yearNumber = req.params.yearNumber
+    const semesterNumber = req.params.semesterNumber
 
     let schedule = await fs.readFile(`./data/schedule${semesterNumber}.json`)
     schedule = JSON.parse(schedule)
