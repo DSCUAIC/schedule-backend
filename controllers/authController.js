@@ -4,6 +4,7 @@ const { createTkn } = require('../utils')
 exports.login = async (req, res) => {
   try {
     const user = await req.db.User.findOne({ ...req.body })
+    req.log.info(user)  
     const token = createTkn(
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
@@ -37,6 +38,38 @@ exports.register = async (req, res) => {
     })
   } catch (error) {
     req.log.error(`Unable create user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
+
+exports.resetPass = async (req, res) => {
+  try {
+    const userToSearchFor = {email: req.body.email, password: req.body.oldPass}
+    const newUserToSearchFor = {email: req.body.email, password: req.body.newPass}
+    const user = await req.db.User.findOne(userToSearchFor)
+    if (user==null){
+      throw "Wrong email or password"
+    }
+    const userChanged = await req.db.User.updateOne(userToSearchFor,{ $set: {password: req.body.newPass} })
+    if (userChanged.nModified!==1){
+      throw "Database couldn't update the password!"
+    }
+    const newUser = await req.db.User.findOne(newUserToSearchFor)
+    
+    const token = createTkn(
+      { ...newUser._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
+      req.config.JWT_KEY
+    )
+
+    return res.json({
+      success: true,
+      token
+    })
+  }
+  catch (error){
+    req.log.error(`Unable to change pass -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
