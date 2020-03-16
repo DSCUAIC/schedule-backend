@@ -4,7 +4,6 @@ const { createTkn } = require('../utils')
 exports.login = async (req, res) => {
   try {
     const user = await req.db.User.findOne({ ...req.body })
-    req.log.info(user)
     const token = createTkn(
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
