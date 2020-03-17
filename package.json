@@ -7,8 +7,6 @@
     "start": "NODE_ENV=dev node app.js",
     "dev": "NODE_ENV=dev nodemon app.js",
     "prod": "NODE_ENV=prod node app.js",
-    "dev-win": "set NODE_ENV=dev&&nodemon app.js",
-    "prod-win": "set NODE_ENV=prod&&node app.js",
     "depcheck": "depcheck .",
     "lint": "standard"
   },
