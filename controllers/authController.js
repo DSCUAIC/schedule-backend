@@ -82,7 +82,6 @@ exports.resetPass = async (req, res) => {
       throw new Error('Wrong password!')
     }
     const newUser = await req.db.User.updateOne(userToSearchFor, { password: newPass })
-
     const token = createTkn(
       { ...newUser._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
