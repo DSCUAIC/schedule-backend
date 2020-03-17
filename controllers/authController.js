@@ -12,7 +12,7 @@ exports.login = async (req, res) => {
       })
     }
 
-    if (req.body.password != user.password) {
+    if (req.body.password !== user.password) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
         message: 'Incorrect password!'
@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
     if (existingUser) {
       return res.status(HttpStatus.CONFLICT).json({
         success: false,
-        message: "User already exists!"
+        message: 'User already exists!'
       })
     }
 
