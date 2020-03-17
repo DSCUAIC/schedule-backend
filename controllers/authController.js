@@ -45,13 +45,14 @@ exports.register = async (req, res) => {
 
 exports.resetPass = async (req, res) => {
   try {
-    const userToSearchFor = { email: req.body.email, password: req.body.oldPass }
-    const newUserToSearchFor = { email: req.body.email, password: req.body.newPass }
+    const { email, oldPass, newPass } = req.body
+    const userToSearchFor = { email: email, password: oldPass }
+    const newUserToSearchFor = { email: email, password: newPass }
     const user = await req.db.User.findOne(userToSearchFor)
     if (user === null) {
       throw new Error('Wrong email or password')
     }
-    const userChanged = await req.db.User.updateOne(userToSearchFor, { $set: { password: req.body.newPass } })
+    const userChanged = await req.db.User.updateOne(userToSearchFor, { $set: { password: newPass } })
     if (userChanged.nModified !== 1) {
       throw new Error('Database couldn\'t update the password!')
     }
