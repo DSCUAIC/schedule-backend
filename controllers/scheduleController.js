@@ -1,5 +1,4 @@
 const HttpStatus = require('http-status-codes')
-const fs = require('fs')
 const { getSchedule } = require('../utils')
 
 exports.getRoomSchedule = async (req, res) => {
