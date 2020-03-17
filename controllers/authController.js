@@ -73,17 +73,15 @@ exports.register = async (req, res) => {
 exports.resetPass = async (req, res) => {
   try {
     const { email, oldPass, newPass } = req.body
-    const userToSearchFor = { email: email, password: oldPass }
-    const newUserToSearchFor = { email: email, password: newPass }
+    const userToSearchFor = { email: email }
     const user = await req.db.User.findOne(userToSearchFor)
     if (user === null) {
-      throw new Error('Wrong email or password')
+      throw new Error('User does not exist!')
     }
-    const userChanged = await req.db.User.updateOne(userToSearchFor, { $set: { password: newPass } })
-    if (userChanged.nModified !== 1) {
-      throw new Error('Database couldn\'t update the password!')
+    if (user.password !== oldPass) {
+      throw new Error('Wrong password!')
     }
-    const newUser = await req.db.User.findOne(newUserToSearchFor)
+    const newUser = await req.db.User.updateOne(userToSearchFor, { password: newPass })
 
     const token = createTkn(
       { ...newUser._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
