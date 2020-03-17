@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const fs = require('fs').promises
 
 const constants = require('./constants')
 exports.constants = constants
@@ -37,4 +38,10 @@ exports.getEvenToken = req => {
   }
 
   return null
+}
+
+exports.getSchedule = async path => {
+  const schedule = await fs.readFile(path)
+
+  return JSON.parse(schedule)
 }
