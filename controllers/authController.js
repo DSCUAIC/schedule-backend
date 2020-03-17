@@ -3,7 +3,24 @@ const { createTkn } = require('../utils')
 
 exports.login = async (req, res) => {
   try {
-    const user = await req.db.User.findOne({ ...req.body })
+    const user = await req.db.User.findOne({ email: req.body.email })
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'User not found!'
+      })
+    }
+
+    if (req.body.password !== user.password) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        success: false,
+        message: 'Incorrect password!'
+      })
+    }
+
+    delete user._doc.password
+
     const token = createTkn(
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
@@ -23,13 +40,23 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
+    const existingUser = await req.db.User.findOne({ email: req.body.email })
+
+    if (existingUser) {
+      return res.status(HttpStatus.CONFLICT).json({
+        success: false,
+        message: 'User already exists!'
+      })
+    }
+
     const user = await req.db.User.create(req.body)
+
+    delete user._doc.password
+
     const token = createTkn(
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
-
-    delete user._doc.password
 
     return res.json({
       success: true,
