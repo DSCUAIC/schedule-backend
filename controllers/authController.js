@@ -19,12 +19,12 @@ exports.login = async (req, res) => {
       })
     }
 
+    delete user._doc.password
+
     const token = createTkn(
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
-
-    delete user._doc.password
 
     return res.status(HttpStatus.OK).json({
       success: true,
@@ -51,12 +51,12 @@ exports.register = async (req, res) => {
 
     const user = await req.db.User.create(req.body)
 
+    delete user._doc.password
+
     const token = createTkn(
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
-
-    delete user._doc.password
 
     return res.json({
       success: true,
