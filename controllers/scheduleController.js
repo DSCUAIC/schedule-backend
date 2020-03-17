@@ -4,7 +4,7 @@ const { getSchedule } = require('../utils')
 
 exports.getRoomSchedule = async (req, res) => {
   try {
-    const orar = JSON.parse(fs.readFileSync('./data/schedule.json'))
+    const orar = await getSchedule('./data/schedule.json')
     if (req.query.r === undefined) {
       return res.status(HttpStatus.OK).send(orar) // ya gettin all the rooms, man
     }
