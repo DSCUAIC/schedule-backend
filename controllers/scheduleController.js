@@ -37,7 +37,14 @@ exports.getGroupSchedule = async (req, res) => {
   try {
     const { yearNumber, semesterNumber, groupName } = req.params;
     
-    const schedule = await getSchedule('./data/schedule.json')
+    if(!["1", "2"].includes(semesterNumber)) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'Invalid semester number'
+      })
+    }
+
+    const schedule = await getSchedule(`./data/schedule${semesterNumber === "1" ? "" : "2"}.json`)
 
     if (!schedule[yearNumber]) {
       return res.status(HttpStatus.NOT_FOUND).json({
