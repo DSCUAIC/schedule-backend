@@ -32,3 +32,48 @@ exports.getYearSchedule = async (req, res) => {
     })
   }
 }
+
+exports.getGroupSchedule = async (req, res) => {
+  try {
+    const { yearNumber, semesterNumber, groupName } = req.params;
+    
+    const schedule = await getSchedule('./data/schedule.json')
+
+    if (!schedule[yearNumber]) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'Invalid year number'
+      })
+    }
+
+    let classes = {};
+    for(const [weekDay, weekDaySchedule] of Object.entries(schedule[yearNumber])) {
+      const weekDayClasses = Array.from(weekDaySchedule).filter(
+        weekDayClass => weekDayClass["Grupa"].endsWith(groupName)
+      );
+      classes[weekDay] = weekDayClasses;
+    }
+
+    const daysOn = Object.values(classes).reduce(
+      (daysOn, weekDaySchedule) => daysOn += Array.from(weekDaySchedule).length
+    , 0)
+    
+    if(!daysOn) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'Invalid group name'
+      })
+    }
+    
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      schedule: classes
+    })
+  } catch(err) {
+    console.log(err)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
