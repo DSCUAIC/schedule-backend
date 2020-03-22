@@ -3,34 +3,48 @@ const { getSchedule } = require('../utils')
 
 exports.getRoomSchedule = async (req, res) => {
   try {
-    const orar = await getSchedule('./data/schedule.json')
-    if (req.query.r === undefined) {
-      return res.status(HttpStatus.OK).send(orar) // ya gettin all the rooms, man
+    const schedule = await getSchedule('./data/schedule.json')
+    const { r } = req.query
+    if (r === undefined) {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        schedule
+      }) // ya gettin all the rooms, man
     }
-    const rooms = req.query.r.split(',')
-    console.log(rooms)
+    const rooms = r.split(',')
     const result = {}
-    for (const an in orar) {
-      for (const zi in orar[an]) {
-        for (const entry in orar[an][zi]) {
-          for (const room in rooms) {
-            if (orar[an][zi][entry].Sala === rooms[room]) {
-              if (!Object.prototype.hasOwnProperty.call(result, an)) {
-                result[an] = {}
-              }
-              if (!Object.prototype.hasOwnProperty.call(result, zi) && !Array.isArray(result[an][zi])) {
-                result[an][zi] = []
-              }
-              result[an][zi].push(orar[an][zi][entry])
-            }
-          }
+    for (const year in schedule) {
+      for (const day in schedule[year]) {
+        // create the empty object to add properties to
+        if (!Object.prototype.hasOwnProperty.call(result, year)) {
+          result[year] = {}
         }
-      }
-    }
 
-    return res.status(HttpStatus.OK).json(result)
+        // creating the list of classes for that day
+        result[year][day] = Array.prototype.filter.call(schedule[year][day], entry => {
+          for (const room in rooms) {
+            if (entry.Sala === rooms[room]) { return true }
+          }
+          return false
+        })
+
+        // if we have no matching classes, we don't want to display this empty array
+        if (Array.isArray(result[year][day]) && result[year][day].length === 0) { delete result[year][day] }
+      }
+
+      // same goes for the object for the year, though it's very unlikely this ever happens
+      if (Object.keys(result[year]).length === 0) { delete result[year] }
+    }
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      schedule: result
+    })
   } catch (error) {
-    return res.send(error)
+    console.error(error)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Something didn't go well.."
+    })
   }
 }
 
