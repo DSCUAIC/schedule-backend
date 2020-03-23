@@ -69,32 +69,3 @@ exports.register = async (req, res) => {
     })
   }
 }
-
-exports.resetPass = async (req, res) => {
-  try {
-    const { email, oldPass, newPass } = req.body
-    const userToSearchFor = { email: email }
-    const user = await req.db.User.findOne(userToSearchFor)
-    if (user === null) {
-      throw new Error('User does not exist!')
-    }
-    if (user.password !== oldPass) {
-      throw new Error('Wrong password!')
-    }
-    const newUser = await req.db.User.updateOne(userToSearchFor, { password: newPass })
-    const token = createTkn(
-      { ...newUser._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
-      req.config.JWT_KEY
-    )
-
-    return res.json({
-      success: true,
-      token
-    })
-  } catch (error) {
-    req.log.error(`Unable to change pass -> ${error}`)
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
-    })
-  }
-}
