@@ -16,12 +16,12 @@ exports.getRoomSchedule = async (req, res) => {
     for (const year in schedule) {
       for (const day in schedule[year]) {
         // create the empty object to add properties to
-        if (!result.hasOwnProperty(year)) {
+        if (!Object.prototype.hasOwnProperty.call(result, year)) {
           result[year] = {}
         }
 
         // creating the list of classes for that day
-        result[year][day] = schedule[year][day].filter(entry => {
+        result[year][day] = Array.prototype.filter.call(schedule[year][day], entry => {
           for (const room in rooms) {
             if (entry.Sala === rooms[room]) { return true }
           }
