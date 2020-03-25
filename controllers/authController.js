@@ -41,7 +41,7 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    /*const existingUser = await req.db.User.findOne({ email: req.body.email })
+    const existingUser = await req.db.User.findOne({ email: req.body.email })
 
     if (existingUser) {
       return res.status(HttpStatus.CONFLICT).json({
@@ -49,7 +49,6 @@ exports.register = async (req, res) => {
         message: 'User already exists!'
       })
     }
-*/
     
     sendVerifMail(req.body.email).catch(console.error);
 
@@ -88,7 +87,7 @@ async function sendVerifMail(mail) {
       to: 'rusudaniel5799@gmail.com', // list of receivers
       subject: "Hello", // Subject line
       text: "Hello world?", // plain text body
-      html: "<b>Hello world?</b>" // html body
+      html: "<b>Hello world?</b>" // html body --> to-do: de pus template-ul din templates/template1.html
     };
 
     transporter.sendMail(mailOption, error => {
@@ -96,6 +95,4 @@ async function sendVerifMail(mail) {
         return console.log(error);
       }
     });
-
-
 }
