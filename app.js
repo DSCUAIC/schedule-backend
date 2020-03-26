@@ -1,3 +1,5 @@
+import { datadogLogs } from '@datadog/browser-logs'
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -11,7 +13,6 @@ const helmet = require('helmet')
 const path = require('path')
 const rfs = require('rotating-file-stream')
 
-const winston = require('winston')
 require('winston-daily-rotate-file')
 
 const {
@@ -21,23 +22,6 @@ const {
 } = require('./middlewares')
 const models = require('./models')
 const router = require('./routes')
-
-const transportFile = new winston.transports.DailyRotateFile({
-  filename: path.join(
-    __dirname,
-    'logs',
-    'application',
-    'application-%DATE%.log'
-  ),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '50m',
-  maxFiles: '14d'
-})
-
-const logger = winston.createLogger({
-  transports: [new winston.transports.Console(), transportFile]
-})
 
 // create a rotating write streamxw
 const logStream = rfs('access_logs.log', {
@@ -49,11 +33,22 @@ let config = dotenv.config({
   path: path.join(__dirname, 'configs', `${process.env.NODE_ENV || 'dev'}.env`)
 }).parsed
 
+datadogLogs.init({
+  clientToken: config.DG_TOKEN,
+  datacenter: 'us',
+  forwardErrorsToLogs: true,
+  sampleRate: 100
+})
+
+const logger = datadogLogs.logger
+
 config = {
   PORT: process.env.PORT || config.PORT,
   DB_URI: process.env.DB_URI || config.DB_URI,
   JWT_KEY: process.env.JWT_KEY || config.JWT_KEY
 }
+
+const metadata = { env: process.env.NODE_ENV || 'dev' }
 
 const app = express()
 
@@ -63,7 +58,8 @@ mongoose
     useUnifiedTopology: true
   })
   .then(() => {
-    logger.info('Connected successfully to database')
+    console.log({ message: 'Connected successfully to the database', level: 'info' })
+    logger.info('Connected successfully to database', metadata)
   })
 
 // Middlewares
@@ -90,6 +86,8 @@ app.use((error, req, res, next) => {
   return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error })
 })
 
-app.listen(config.PORT, () =>
-  logger.info(`Schedule app is now listening on port ${config.PORT}`)
+app.listen(config.PORT, () => {
+  console.log({ message: `Schedule app is now listening on port ${config.PORT}`, level: 'info' })
+  logger.info(`Schedule app is now listening on port ${config.PORT}`, metadata)
+}
 )
