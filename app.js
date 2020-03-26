@@ -14,11 +14,7 @@ const rfs = require('rotating-file-stream')
 const winston = require('winston')
 require('winston-daily-rotate-file')
 
-const {
-  setLogger,
-  setConfig,
-  setDatabase
-} = require('./middlewares')
+const { setLogger, setConfig, setDatabase } = require('./middlewares')
 const models = require('./models')
 const router = require('./routes')
 

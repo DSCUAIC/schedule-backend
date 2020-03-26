@@ -35,16 +35,18 @@ exports.getYearSchedule = async (req, res) => {
 
 exports.getGroupSchedule = async (req, res) => {
   try {
-    const { yearNumber, semesterNumber, groupName } = req.params;
-    
-    if(!["1", "2"].includes(semesterNumber)) {
+    const { yearNumber, semesterNumber, groupName } = req.params
+
+    if (!['1', '2'].includes(semesterNumber)) {
       return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: 'Invalid semester number'
       })
     }
 
-    const schedule = await getSchedule(`./data/schedule${semesterNumber === "1" ? "" : "2"}.json`)
+    const schedule = await getSchedule(
+      `./data/schedule${semesterNumber === '1' ? '' : '2'}.json`
+    )
 
     if (!schedule[yearNumber]) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -53,30 +55,34 @@ exports.getGroupSchedule = async (req, res) => {
       })
     }
 
-    let classes = {};
-    for(const [weekDay, weekDaySchedule] of Object.entries(schedule[yearNumber])) {
-      const weekDayClasses = Array.from(weekDaySchedule).filter(
-        weekDayClass => weekDayClass["Grupa"].endsWith(groupName)
-      );
-      classes[weekDay] = weekDayClasses;
+    let classes = {}
+    let isGroupNameValid = false
+
+    for (const [weekDay, weekDaySchedule] of Object.entries(
+      schedule[yearNumber]
+    )) {
+      const weekDayClasses = weekDaySchedule.filter(weekDayClass =>
+        weekDayClass['Grupa'].endsWith(groupName)
+      )
+      classes[weekDay] = weekDayClasses
+
+      if (!isGroupNameValid && weekDayClasses.length > 0) {
+        isGroupNameValid = true
+      }
     }
 
-    const daysOn = Object.values(classes).reduce(
-      (daysOn, weekDaySchedule) => daysOn += Array.from(weekDaySchedule).length
-    , 0)
-    
-    if(!daysOn) {
+    if (!isGroupNameValid) {
       return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: 'Invalid group name'
       })
     }
-    
+
     return res.status(HttpStatus.OK).json({
       success: true,
       schedule: classes
     })
-  } catch(err) {
+  } catch (err) {
     console.log(err)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
