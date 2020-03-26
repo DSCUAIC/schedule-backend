@@ -6,12 +6,6 @@ const userSchema = new Schema({
   },
   password: {
     type: String
-  },
-  isMailVerified: {
-    type: Boolean
-  },
-  token: {
-    type: String
   }
 })
 
