@@ -1,6 +1,7 @@
 const HttpStatus = require('http-status-codes')
 const { decodeTkn, getEvenToken, constants } = require('../utils')
 const { idClaim } = constants
+const payloadValidation = require('./payloadValidation')
 
 exports.setLogger = logger => {
   return (req, res, next) => {
@@ -63,3 +64,5 @@ exports.requireAuth = () => {
     }
   }
 }
+
+exports.payloadValidation = payloadValidation

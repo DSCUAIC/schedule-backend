@@ -16,7 +16,7 @@ exports.getAllUsers = async (req, res) => {
   }
 }
 
-exports.createUser = async (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
   } catch (error) {
     req.log.error(`Unable create user -> ${error}`)
