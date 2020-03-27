@@ -87,7 +87,7 @@ exports.getRoomSchedule = async (req, res) => {
       }
     })
   } catch (error) {
-    console.error(error)
+    req.log.error(`Unable to getroom schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Something didn't go well.."
@@ -114,7 +114,7 @@ exports.getYearSchedule = async (req, res) => {
       schedule: { sem1: schedule[yearNumber], sem2: schedule2[yearNumber] }
     })
   } catch (error) {
-    console.log(error)
+    req.log.error(`Unable to get year schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'
@@ -150,7 +150,7 @@ exports.getYearSemesterSchedule = async (req, res) => {
       message: 'Invalid semester number'
     })
   } catch (error) {
-    console.error(error)
+    req.log.error(`Unable to get semester schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'
@@ -207,8 +207,8 @@ exports.getGroupSchedule = async (req, res) => {
       success: true,
       schedule: classes
     })
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    req.log.error(`Unable to get group schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'
