@@ -5,7 +5,26 @@ const payloadValidation = require('./payloadValidation')
 
 exports.setLogger = logger => {
   return (req, res, next) => {
-    req.log = logger
+    const metadata = { env: process.env.NODE_ENV || 'dev' }
+ 
+    const log = {
+      info: message => {
+        console.log(message)
+        logger.info(message, metadata)
+      },
+ 
+      debug: message => {
+        console.log(message)
+        logger.debug(message, metadata)
+      }, 
+
+      error: message => {
+        console.error(message)
+        logger.info(message, metadata)
+      }
+    }
+ 
+    req.log = log
     next()
   }
 }
