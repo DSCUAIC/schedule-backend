@@ -12,11 +12,26 @@ exports.setLogger = logger => {
 
 exports.setConfig = config => {
   return (req, res, next) => {
-    req.config = config
-    req.tknConfig = {
-      iss: config.TKN_ISS,
-      aud: config.TKN_AUD
+    const metadata = { env: process.env.NODE_ENV || 'dev' }
+ 
+    const log = {
+      info: message => {
+        console.log(message)
+        logger.info(message, metadata)
+      },
+ 
+      debug: message => {
+        console.log(message)
+        logger.debug(message, metadata)
+      }, 
+
+      error: message => {
+        console.error(message)
+        logger.error(message, metadata)
+      }
     }
+ 
+    req.log = log
     next()
   }
 }
