@@ -1,6 +1,6 @@
 const HttpStatus = require('http-status-codes')
 const { createTkn } = require('../utils')
-var mailer = require('../utils/sendMail')
+var sendEmail = require('../utils/sendMail')
 
 exports.login = async (req, res) => {
   try {
@@ -41,10 +41,9 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    mailer.sendMail(req.body.email);
-    console.log(req.body.email);
-
     const existingUser = await req.db.User.findOne({ email: req.body.email })
+
+    sendEmail({config: req.config, to: req.body.email, template: "welcome", vars: {firstName: req.body.firstName, lastName: req.body.lastName}})
 
     if (existingUser) {
       return res.status(HttpStatus.CONFLICT).json({

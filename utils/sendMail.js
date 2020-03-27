@@ -1,31 +1,20 @@
 const nodemailer = require("nodemailer")
+const sgMail = require('@sendgrid/mail')
 
-module.exports = {
-    sendMail : function(mail) {
-        if (typeof mail === 'string' || mail instanceof String) {
-            let transporter = nodemailer.createTransport({
-                service: "Gmail",
-                auth: {
-                    user: "testdsc242@gmail.com",
-                    pass: "testdsc0"
-                }
-            });
-
-            console.log(mail);
-
-            let mailOption = {
-                from: 'Test Test <testdsc242@gmail.com>', // sender address
-                to: 'to-do', // list of receivers
-                subject: "Hello", // Subject line
-                text: "Hello world?", // plain text body
-                html: "to-do" // html body --> to-do: de pus template-ul din templates/template1.html
-            };
-
-            transporter.sendMail(mailOption, error => {
-                if(error) {
-                    return console.log(error);
-                }
-            });
-        }
-    }
+const templates = {
+    welcome: 'd-1f1ae50ff4584d169e15b6924caf07c8'
 }
+const sendEmail = function({config, to, template, vars}) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY || config.SENDGRID_API_KEY);
+
+    const msg = {
+        to,
+        from: {name: "Support schedule app", email: "support@dsc-uaic.com"},
+        templateId: templates[template],
+        dynamicTemplateData: vars
+    };
+
+    return sgMail.send(msg);
+}
+
+module.exports = sendEmail
