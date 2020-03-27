@@ -43,8 +43,6 @@ exports.register = async (req, res) => {
   try {
     const existingUser = await req.db.User.findOne({ email: req.body.email })
 
-    sendEmail({config: req.config, to: req.body.email, template: "welcome", vars: {firstName: req.body.firstName, lastName: req.body.lastName}})
-
     if (existingUser) {
       return res.status(HttpStatus.CONFLICT).json({
         success: false,
@@ -60,6 +58,8 @@ exports.register = async (req, res) => {
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
+
+    sendEmail({config: req.config, to: req.body.email, template: "welcome", vars: {firstName: req.body.firstName, lastName: req.body.lastName}})
 
     return res.json({
       success: true,
