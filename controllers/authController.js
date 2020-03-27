@@ -59,7 +59,7 @@ exports.register = async (req, res) => {
       req.config.JWT_KEY
     )
 
-    sendEmail({config: req.config, to: req.body.email, template: "welcome", vars: {firstName: req.body.firstName, lastName: req.body.lastName}})
+    sendEmail({ config: req.config, to: req.body.email, template: 'welcome', vars: { firstName: req.body.firstName, lastName: req.body.lastName } })
 
     return res.json({
       success: true,

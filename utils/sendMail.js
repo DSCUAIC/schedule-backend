@@ -1,9 +1,9 @@
-const nodemailer = require("nodemailer")
 const sgMail = require('@sendgrid/mail')
 
 const templates = {
     welcome: 'd-1f1ae50ff4584d169e15b6924caf07c8'
 }
+
 const sendEmail = function({config, to, template, vars}) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY || config.SENDGRID_API_KEY);
 
