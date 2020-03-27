@@ -34,7 +34,7 @@ config = {
 }
 
 const httpTransportOptions = {
-  host: 'http-intake.logs.datadoghq.com',
+  host: process.env.DG_HOST || config.DG_HOST,
   path: `/v1/input/${process.env.DG_TOKEN ||
     config.DG_TOKEN}?ddsource=nodejs&service=${process.env.DG_NAME ||
     config.DG_NAME}`,
