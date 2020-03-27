@@ -33,6 +33,37 @@ exports.getYearSchedule = async (req, res) => {
   }
 }
 
+exports.getYearSemesterSchedule = async (req, res) => {
+  try {
+    const { yearNumber, semesterNumber } = req.params
+    if (semesterNumber === '1' || semesterNumber === '2') {
+      let pathToSchedule = './data/schedule.json'
+      if (semesterNumber === '2') pathToSchedule = './data/schedule2.json'
+      const schedule = await getSchedule(pathToSchedule)
+      if (!schedule[yearNumber]) {
+        return res.status(HttpStatus.NOT_FOUND).json({
+          success: false,
+          message: 'Invalid year number'
+        })
+      }
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        schedule: schedule[yearNumber]
+      })
+    }
+    return res.status(HttpStatus.NOT_FOUND).json({
+      success: false,
+      message: 'Invalid semester number'
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
+
 exports.getGroupSchedule = async (req, res) => {
   try {
     const { yearNumber, semesterNumber, groupName } = req.params
