@@ -55,14 +55,14 @@ exports.getGroupSchedule = async (req, res) => {
       })
     }
 
-    let classes = {}
+    const classes = {}
     let isGroupNameValid = false
 
     for (const [weekDay, weekDaySchedule] of Object.entries(
       schedule[yearNumber]
     )) {
       const weekDayClasses = weekDaySchedule.filter(weekDayClass =>
-        weekDayClass['Grupa'].endsWith(groupName)
+        weekDayClass.Grupa.endsWith(groupName)
       )
       classes[weekDay] = weekDayClasses
 
