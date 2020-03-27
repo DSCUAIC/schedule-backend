@@ -9,7 +9,7 @@ const sendEmail = function ({ config, to, template, vars }) {
 
   const msg = {
     to,
-    from: {name: 'Support schedule app', email: 'support@dsc-uaic.com'},
+    from: { name: 'Support schedule app', email: 'support@dsc-uaic.com' },
     templateId: templates[template],
     dynamicTemplateData: vars
   }
