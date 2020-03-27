@@ -9,7 +9,7 @@ exports.getAllUsers = async (req, res) => {
       users
     })
   } catch (error) {
-    req.log.error(`Unable get users -> ${req.url} -> ${error}`)
+    req.log.error(`Unable to get users -> ${req.url} -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
@@ -19,7 +19,7 @@ exports.getAllUsers = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
   } catch (error) {
-    req.log.error(`Unable create user -> ${error}`)
+    req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
@@ -39,7 +39,7 @@ exports.changePassword = async (req, res) => {
       success: true
     })
   } catch (error) {
-    req.log.error(`Unable to change pass -> ${error}`)
+    req.log.error(`Unable to change password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message

@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
       token
     })
   } catch (error) {
-    req.log.error(`Unable get user -> ${req.url} -> ${error}`)
+    req.log.error(`Unable to get user -> ${req.url} -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
@@ -63,7 +63,7 @@ exports.register = async (req, res) => {
       token
     })
   } catch (error) {
-    req.log.error(`Unable create user -> ${error}`)
+    req.log.error(`Unable to create user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
