@@ -41,7 +41,11 @@ exports.getEvenToken = req => {
 }
 
 exports.getSchedule = async path => {
-  const schedule = await fs.readFile(path)
+  try {
+    const schedule = await fs.readFile(path)
 
-  return JSON.parse(schedule)
+    return JSON.parse(schedule)
+  } catch (error) {
+    return null
+  }
 }
