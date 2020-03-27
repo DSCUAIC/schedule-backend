@@ -11,33 +11,11 @@ const helmet = require('helmet')
 const path = require('path')
 const rfs = require('rotating-file-stream')
 
-const winston = require('winston')
-require('winston-daily-rotate-file')
+const { createLogger, format, transports } = require('winston')
 
-const {
-  setLogger,
-  setConfig,
-  setDatabase
-} = require('./middlewares')
+const { setLogger, setConfig, setDatabase } = require('./middlewares')
 const models = require('./models')
 const router = require('./routes')
-
-const transportFile = new winston.transports.DailyRotateFile({
-  filename: path.join(
-    __dirname,
-    'logs',
-    'application',
-    'application-%DATE%.log'
-  ),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '50m',
-  maxFiles: '14d'
-})
-
-const logger = winston.createLogger({
-  transports: [new winston.transports.Console(), transportFile]
-})
 
 // create a rotating write streamxw
 const logStream = rfs('access_logs.log', {
@@ -53,6 +31,26 @@ config = {
   PORT: process.env.PORT || config.PORT,
   DB_URI: process.env.DB_URI || config.DB_URI,
   JWT_KEY: process.env.JWT_KEY || config.JWT_KEY
+}
+
+const httpTransportOptions = {
+  host: process.env.DG_HOST || config.DG_HOST,
+  path: `/v1/input/${process.env.DG_TOKEN ||
+    config.DG_TOKEN}?ddsource=nodejs&service=${process.env.DG_NAME ||
+    config.DG_NAME}`,
+  ssl: true
+}
+
+const logger = createLogger({
+  level: 'info',
+  exitOnError: false,
+  format: format.json(),
+  defaultMeta: { env: process.env.NODE_ENV || 'dev' },
+  transports: [new transports.Http(httpTransportOptions)]
+})
+
+if (process.env.NODE_ENV !== 'prod') {
+  logger.add(new transports.Console({ format: format.simple() }))
 }
 
 const app = express()
