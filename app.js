@@ -1,5 +1,4 @@
-import { datadogLogs } from '@datadog/browser-logs'
-
+const { datadogLogs } = require('@datadog/browser-logs')
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
