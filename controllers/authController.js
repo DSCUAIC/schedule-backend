@@ -1,5 +1,6 @@
 const HttpStatus = require('http-status-codes')
 const { createTkn } = require('../utils')
+var sendEmail = require('../utils/sendMail')
 
 exports.login = async (req, res) => {
   try {
@@ -57,6 +58,8 @@ exports.register = async (req, res) => {
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
+
+    sendEmail({ config: req.config, to: req.body.email, template: 'welcome', vars: { firstName: req.body.firstName, lastName: req.body.lastName } })
 
     return res.json({
       success: true,
