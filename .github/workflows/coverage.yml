@@ -1,9 +1,12 @@
 name: Node.js CI
 
-on: push
+on:
+  push:
+    branches:
+      - master
 
 jobs:
-  build:
+  coverage:
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,6 +23,8 @@ jobs:
     - run: npm run lint
     - run: npm run depcheck
     - run: npm run test-coverage --if-present
+    - run: export CODACY_PROJECT_TOKEN={{ secrets.CODACY_PROJECT_TOKEN }}
+    - run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
       env:
         CI: true
   
