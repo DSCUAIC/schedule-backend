@@ -6,34 +6,14 @@ on:
       - master
 
 jobs:
-  coverage:
+  report:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [13.x]
-
+    name: codacy-coverage-reporter
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run lint
-    - run: npm run depcheck
-    - run: npm run test-coverage --if-present
-    - run: export CODACY_PROJECT_TOKEN={{ secrets.CODACY_PROJECT_TOKEN }}
-    - run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
-      env:
-        CI: true
-        PORT: ${{ secrets.PORT }}
-        DB_URI: ${{ secrets.DB_URI }}
-        JWT_KEY: ${{ secrets.JWT_KEY }}
-        DG_HOST: ${{ secrets.DG_HOST }}
-        DG_TOKEN: ${{ secrets.DG_TOKEN }}
-        DG_NAME: ${{ secrets.DG_NAME }}
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-  
-  
+      - run: npm i
+      - run: npm run test-coverage --if-present
+      - uses: actions/checkout@master
+      - name: Run codacy-coverage-reporter
+        uses: mrfyda/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
