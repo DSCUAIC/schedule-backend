@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     name: codacy-coverage-reporter
     steps:
+      - uses: actions/checkout@v2
       - run: npm i
       - run: npm run test-coverage --if-present
-      - uses: actions/checkout@v2
       - name: Run codacy-coverage-reporter
         uses: mrfyda/codacy-coverage-reporter-action@master
         with:
