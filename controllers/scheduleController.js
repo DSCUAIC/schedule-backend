@@ -215,3 +215,236 @@ exports.getGroupSchedule = async (req, res) => {
     })
   }
 }
+
+const daysRo = {
+  1: 'Luni',
+  2: 'Marti',
+  3: 'Miercuri',
+  4: 'Joi',
+  5: 'Vineri',
+  6: 'Sambata',
+  7: 'Duminica'
+}
+
+exports.getScheduleWithParams = async (req, res) => {
+  try {
+    const schedule = await getSchedule('./data/schedule.json')
+    const schedule2 = await getSchedule('./data/schedule2.json')
+
+    const { faculty, semester, year, group, semiyear, room } = req.query
+    let dayNum = req.query.day
+
+    // if no params send the entire schedule
+    if (!faculty && !semester && !year && !dayNum && !group && !semiyear && !room) {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        schedule: {
+          FII: {
+            sem1: schedule,
+            sem2: schedule2
+          }
+        }
+      })
+    }
+
+    // temporary until the new schedule structure
+    if (faculty && faculty !== 'FII') {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        schedule: {}
+      })
+    }
+
+    let ret = {}
+    ret.FII = {
+      sem1: schedule,
+      sem2: schedule2
+    }
+
+    // filters the semester
+    if (semester) {
+      if (semester !== '1' && semester !== '2') {
+        return res.status(HttpStatus.NOT_FOUND).json({
+          success: false,
+          message: 'Invalid semester number'
+        })
+      }
+      if (semester === '1') {
+        for (const fac in ret) {
+          delete ret[fac].sem2
+        }
+      } else {
+        for (const fac in ret) {
+          delete ret[fac].sem1
+        }
+      }
+    }
+
+    // filters the year
+    if (year) {
+      const years = year.split(',')
+      for (const fac in ret) {
+        for (const sem in ret[fac]) {
+          for (const y in ret[fac][sem]) {
+            if (!years.includes(y)) {
+              delete ret[fac][sem][y]
+            }
+          }
+        }
+      }
+    }
+
+    // filters the day
+    if (dayNum) {
+      const days = dayNum.split(',')
+      let daysText = []
+      daysText = undefined
+      daysText = []
+      daysText.splice(0, 1)
+      for (let index = 0; index < days.length; index++) {
+        if (daysRo[days[index]] === undefined) {
+          days.splice(index, 1)
+          index--
+        } else {
+          daysText.push(daysRo[days[index]])
+        }
+      }
+      if (days.length === 0) {
+        dayNum = ''
+      } else {
+        for (const fac in ret) {
+          for (const sem in ret[fac]) {
+            for (const y in ret[fac][sem]) {
+              for (const d in ret[fac][sem][y]) {
+                if (!daysText.includes(d)) {
+                  delete ret[fac][sem][y][d]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // filters the group, semiyear and room
+    if (group || semiyear || room) {
+      let groups = []
+      let semiyears = []
+      let rooms = []
+      if (group) groups = group.split(',')
+      if (semiyear) semiyears = semiyear.split(',')
+      if (room) rooms = room.split(',')
+
+      for (const fac in ret) {
+        for (const sem in ret[fac]) {
+          for (const y in ret[fac][sem]) {
+            for (const d in ret[fac][sem][y]) {
+              ret[fac][sem][y][d] = ret[fac][sem][y][d].filter(classObj => {
+                var r = false
+
+                // filters the group
+                if (group) {
+                  groups.forEach(groupParam => {
+                    classObj.Grupa.split(' , ').forEach(classGroup => {
+                      if (classGroup.length === 2 || classGroup.length === 3 || classGroup.endsWith(groupParam)) r = true
+                    })
+                  })
+                }
+                if (r === false) return false
+
+                // filters the semiyear
+                if (semiyear) {
+                  r = false
+                  semiyears.forEach(semiyearParam => {
+                    classObj.Grupa.split(' , ').forEach(classGroup => {
+                      if (classGroup.length === 2 || classGroup[2] === semiyearParam) r = true
+                    })
+                  })
+                }
+                if (r === false) return false
+
+                // filters the room
+                if (room) {
+                  r = false
+                  rooms.forEach(roomParam => {
+                    if (classObj.Sala === roomParam) r = true
+                  })
+                }
+                return r
+              })
+
+              // removes day from ret if is empty
+              if (ret[fac][sem][y][d].length === 0) {
+                delete ret[fac][sem][y][d]
+              }
+            }
+
+            // removes year from ret if is empty
+            if (Object.keys(ret[fac][sem][y]).length === 0) {
+              delete ret[fac][sem][y]
+            }
+          }
+        }
+      }
+    }
+
+    // removes day key from ret if parameter is set and doesn't contain a comma
+    if (dayNum && dayNum.split(',').length === 1) {
+      for (const fac in ret) {
+        for (const sem in ret[fac]) {
+          for (const y in ret[fac][sem]) {
+            const aux = ret[fac][sem][y][daysRo[dayNum]]
+            delete ret[fac][sem][y][daysRo[dayNum]]
+            ret[fac][sem][y] = aux
+          }
+        }
+      }
+    }
+
+    // removes year key from ret if parameter is set and doesn't contain a comma
+    if (year && year.split(',').length === 1) {
+      for (const fac in ret) {
+        for (const sem in ret[fac]) {
+          const aux = ret[fac][sem][year]
+          delete ret[fac][sem][year]
+          ret[fac][sem] = aux
+        }
+      }
+    }
+
+    // removes sem1/2 key from ret if parameter is set
+    if (semester) {
+      if (semester === 1) {
+        for (const fac in ret) {
+          const aux = ret[fac].sem1
+          delete ret[fac].sem1
+          ret[fac] = aux
+        }
+      } else {
+        for (const fac in ret) {
+          const aux = ret[fac].sem2
+          delete ret[fac].sem2
+          ret[fac] = aux
+        }
+      }
+    }
+
+    // removes faculty key from ret if parameter is set and doesn't contain a comma
+    if (faculty && faculty.split(',').length === 1) {
+      const aux = ret[faculty]
+      delete ret[faculty]
+      ret = aux
+    }
+
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      schedule: ret
+    })
+  } catch (error) {
+    req.log.error(`Unable to get parameterized schedule -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Internal server error'
+    })
+  }
+}
