@@ -18,7 +18,7 @@
     "prod:default": "NODE_ENV=prod node app.js",
     "depcheck": "depcheck .",
     "lint": "standard --env jest",
-    "test": "jest --detectOpenHandles",
+    "test": "jest --forceExit",
     "test-coverage": "jest --coverage --forceExit"
   },
   "repository": {
