@@ -17,3 +17,5 @@ jobs:
         uses: mrfyda/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        env:
+          PORT: 3000
