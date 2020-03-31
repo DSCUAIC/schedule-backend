@@ -12,7 +12,7 @@ jobs:
     steps:
       - run: npm i
       - run: npm run test-coverage --if-present
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: Run codacy-coverage-reporter
         uses: mrfyda/codacy-coverage-reporter-action@master
         with:
