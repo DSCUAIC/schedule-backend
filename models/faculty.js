@@ -36,26 +36,22 @@ const facultySchema = new Schema(
   { timestamps: true }
 )
 
-facultySchema.statics.findOneAll = async function(query) {
-  try {
-    const fac = await this.model('faculties').findOne(query)
+facultySchema.statics.findOneAll = async function (query) {
+  const fac = await this.model('faculties').findOne(query)
 
-    if (fac.sem1ScheduleId) {
-      fac.sem1Schedule = await this.model('schedules').findOne({
-        _id: ObjectId(fac.sem1ScheduleId)
-      })
-    }
-
-    if (fac.sem2ScheduleId) {
-      fac.sem2Schedule = await this.model('schedules').findOne({
-        _id: ObjectId(fac.sem2ScheduleId)
-      })
-    }
-
-    return fac
-  } catch (error) {
-    throw error
+  if (fac.sem1ScheduleId) {
+    fac.sem1Schedule = await this.model('schedules').findOne({
+      _id: ObjectId(fac.sem1ScheduleId)
+    })
   }
+
+  if (fac.sem2ScheduleId) {
+    fac.sem2Schedule = await this.model('schedules').findOne({
+      _id: ObjectId(fac.sem2ScheduleId)
+    })
+  }
+
+  return fac
 }
 
 module.exports = model('faculties', facultySchema)
