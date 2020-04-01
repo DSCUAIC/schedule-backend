@@ -1,6 +1,9 @@
 const HttpStatus = require('http-status-codes')
 const { createTkn } = require('../utils')
 const sendEmail = require('../utils/sendMail')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
+const salt = bcrypt.genSaltSync(saltRounds)
 
 exports.login = async (req, res) => {
   try {
@@ -13,7 +16,7 @@ exports.login = async (req, res) => {
       })
     }
 
-    if (req.body.password !== user.password) {
+    if (bcrypt.hashSync(req.body.password, salt) !== user.password) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
         message: 'Incorrect password!'
@@ -50,6 +53,7 @@ exports.register = async (req, res) => {
       })
     }
 
+    req.body.password = bcrypt.hashSync(req.body.password, salt)
     const user = await req.db.User.create(req.body)
 
     delete user._doc.password
