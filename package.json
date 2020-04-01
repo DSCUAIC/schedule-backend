@@ -16,7 +16,7 @@
     "prod:win32": "set NODE_ENV=prod&&node app.js",
     "prod:darwin:linux": "NODE_ENV=prod node app.js",
     "prod:default": "NODE_ENV=prod node app.js",
-    "depcheck": "depcheck .",
+    "depcheck": "depcheck . --ignores=eslint",
     "lint": "standard --env jest",
     "test": "jest --forceExit",
     "test-coverage": "jest --coverage --forceExit"
