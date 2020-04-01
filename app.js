@@ -24,7 +24,11 @@ const logStream = rfs('access_logs.log', {
 })
 
 let config = dotenv.config({
-  path: path.join(__dirname, 'configs', `${process.env.NODE_ENV || 'dev'}.env`)
+  path: path.join(
+    process.cwd(),
+    'configs',
+    `${process.env.NODE_ENV || 'dev'}.env`
+  )
 }).parsed
 
 config = {
@@ -91,3 +95,5 @@ app.use((error, req, res, next) => {
 app.listen(config.PORT, () =>
   logger.info(`Schedule app is now listening on port ${config.PORT}`)
 )
+
+module.exports = app
