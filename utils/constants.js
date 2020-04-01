@@ -1,3 +1,5 @@
 module.exports = {
-  idClaim: 'user:id'
+  idClaim: 'user:id',
+  saltRounds: 10
+
 }
