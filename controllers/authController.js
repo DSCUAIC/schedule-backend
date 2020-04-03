@@ -1,5 +1,5 @@
 const HttpStatus = require('http-status-codes')
-const { createTkn } = require('../utils')
+const { createTkn, decodeTkn } = require('../utils')
 const sendEmail = require('../utils/sendMail')
 
 exports.login = async (req, res) => {
@@ -19,7 +19,12 @@ exports.login = async (req, res) => {
         message: 'Incorrect password!'
       })
     }
-
+    if (user.verified === false) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        success: false,
+        message: 'User not validated!'
+      })
+    }
     delete user._doc.password
 
     const token = createTkn(
@@ -58,12 +63,12 @@ exports.register = async (req, res) => {
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
-
+    const link = 'http://localhost:4200/verification?token=' + token
     sendEmail({
       config: req.config,
       to: req.body.email,
-      template: 'welcome',
-      vars: { firstName: req.body.firstname, lastName: req.body.lastname }
+      template: 'emailVerification',
+      vars: { firstName: req.body.firstname, lastName: req.body.lastname, link }
     })
 
     return res.json({
@@ -72,6 +77,31 @@ exports.register = async (req, res) => {
     })
   } catch (error) {
     req.log.error(`Unable to create user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
+
+exports.validate = async (req, res) => {
+  try {
+    const token = req.query.token
+    const { email } = decodeTkn(token, req.config.JWT_KEY)
+    const newUser = { email }
+    const user = await req.db.User.findOne(newUser)
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'User not found!'
+      })
+    }
+    await req.db.User.updateOne(newUser, { verified: true })
+    return res.json({
+      success: true,
+      token
+    })
+  } catch (error) {
+    req.log.error(`Unable to validate user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
