@@ -28,6 +28,17 @@ exports.setDatabase = db => {
   }
 }
 
+exports.requireAdmin = (req, res, next) => {
+  if (req.user.admin) {
+    next()
+  }
+
+  return res.status(HttpStatus.FORBIDDEN).json({
+    success: false,
+    message: 'You must be an admin to access'
+  })
+}
+
 exports.requireAuth = () => {
   const skipPaths = ['/auth/register', '/auth/login']
 
