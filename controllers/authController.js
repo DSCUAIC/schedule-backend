@@ -14,7 +14,6 @@ exports.login = async (req, res) => {
       })
     }
 
-    req.body.password = bcrypt.hashSync(req.body.password, constants.saltRounds)
     if (bcrypt.compareSync(req.body.password, user.password)) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
