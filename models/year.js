@@ -10,28 +10,37 @@ const yearSchema = new Schema(
       type: Number,
       required: true
     },
-    facultyId: {
-      type: String,
-      required: true
-    },
     faculty: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'faculties',
       default: null
     },
-    scheduleId: {
-      type: String,
-      required: true
-    },
     schedule: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'schedules',
       default: null
     },
     days: {
-      type: Array,
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'days'
+        }
+      ],
       default: []
     }
   },
   { timestamps: true }
 )
+
+yearSchema.post('find', async docs => {
+  for (const doc of docs) {
+    await doc.populate('days').execPopulate()
+  }
+})
+
+yearSchema.post('findOne', async doc => {
+  await doc.populate('days').execPopulate()
+})
 
 module.exports = model('years', yearSchema)
