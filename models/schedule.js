@@ -6,20 +6,32 @@ const scheduleSchema = new Schema(
       type: Number,
       required: true
     },
-    facultyId: {
-      type: String,
+    faculty: {
+      type: Schema.Types.ObjectId,
+      ref: 'faculties',
       required: true
     },
-    faculty: {
-      type: Object,
-      default: null
-    },
     years: {
-      type: Array,
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'years'
+        }
+      ],
       default: []
     }
   },
   { timestamps: true }
 )
+
+scheduleSchema.post('find', async docs => {
+  for (const doc of docs) {
+    await doc.populate('years').execPopulate()
+  }
+})
+
+scheduleSchema.post('findOne', async doc => {
+  await doc.populate('years').execPopulate()
+})
 
 module.exports = model('schedules', scheduleSchema)

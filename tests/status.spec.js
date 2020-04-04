@@ -1,13 +1,18 @@
 const HttpStatus = require('http-status-codes')
 const supertest = require('supertest')
+const mongoose = require('mongoose')
 
-const app = require('../app')
+const app = require('../server')
 
 describe('GET /', () => {
   let server
 
   beforeAll(async () => {
-    server = supertest(app)
+    server = supertest.agent(await app())
+  })
+
+  afterAll(async () => {
+    await mongoose.disconnect()
   })
 
   test('should succeed if server is up', async () => {
