@@ -6,36 +6,42 @@ const daySchema = new Schema(
       type: Number,
       required: true
     },
-    yearId: {
-      type: String,
-      required: true
-    },
     year: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'years',
       default: null
-    },
-    facultyId: {
-      type: String,
-      required: true
     },
     faculty: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'faculties',
       default: null
     },
-    scheduleId: {
-      type: String,
-      required: true
-    },
     schedule: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'schedules',
       default: null
     },
     courses: {
-      type: Array,
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'courses'
+        }
+      ],
       default: []
     }
   },
   { timestamps: true }
 )
+
+daySchema.post('find', async docs => {
+  for (const doc of docs) {
+    await doc.populate('courses').execPopulate()
+  }
+})
+
+daySchema.post('findOne', async doc => {
+  await doc.populate('courses').execPopulate()
+})
 
 module.exports = model('days', daySchema)

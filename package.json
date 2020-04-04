@@ -4,22 +4,19 @@
   "description": "The official package of the schedule backend api",
   "main": "index.js",
   "scripts": {
-    "start": "run-script-os",
-    "start:win32": "set NODE_ENV=dev&&node app.js",
-    "start:darwin:linux": "NODE_ENV=dev node app.js",
-    "start:default": "NODE_ENV=dev node app.js",
+    "start": "npm run prod",
     "dev": "run-script-os",
-    "dev:win32": "set NODE_ENV=dev&&nodemon app.js",
-    "dev:darwin:linux": "NODE_ENV=dev nodemon app.js",
-    "dev:default": "NODE_ENV=dev nodemon app.js",
+    "dev:win32": "set NODE_ENV=dev&&nodemon index.js",
+    "dev:darwin:linux": "NODE_ENV=dev nodemon index.js",
+    "dev:default": "NODE_ENV=dev nodemon index.js",
     "prod": "run-script-os",
-    "prod:win32": "set NODE_ENV=prod&&node app.js",
-    "prod:darwin:linux": "NODE_ENV=prod node app.js",
-    "prod:default": "NODE_ENV=prod node app.js",
+    "prod:win32": "set NODE_ENV=prod&&node index.js",
+    "prod:darwin:linux": "NODE_ENV=prod node index.js",
+    "prod:default": "NODE_ENV=prod node index.js",
     "depcheck": "depcheck . --ignores=eslint",
-    "lint": "standard --env jest",
-    "test": "jest --forceExit",
-    "test-coverage": "jest --coverage --forceExit"
+    "lint": "standard",
+    "test": "jest",
+    "test-coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -69,7 +66,7 @@
   },
   "standard": {
     "ignore": [
-      "test/**/*.js"
+      "tests/**/*.js"
     ]
   }
 }
