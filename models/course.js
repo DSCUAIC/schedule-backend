@@ -6,36 +6,24 @@ const courseSchema = new Schema(
       type: Number,
       required: true
     },
-    dayId: {
-      type: String,
-      required: true
-    },
     day: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'days',
       default: null
-    },
-    yearId: {
-      type: String,
-      required: true
     },
     year: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'years',
       default: null
-    },
-    facultyId: {
-      type: String,
-      required: true
     },
     faculty: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'faculties',
       default: null
     },
-    scheduleId: {
-      type: String,
-      required: true
-    },
     schedule: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'schedules',
       default: null
     },
     from: {
