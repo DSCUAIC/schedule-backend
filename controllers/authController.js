@@ -1,5 +1,5 @@
 const HttpStatus = require('http-status-codes')
-const { createTkn, constants,decodeTkn } = require('../utils')
+const { createTkn, constants, decodeTkn } = require('../utils')
 const sendEmail = require('../utils/sendMail')
 const bcrypt = require('bcrypt')
 
