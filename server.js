@@ -5,6 +5,7 @@ const compression = require('compression')
 const HttpStatus = require('http-status-codes')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager')
 
 const mongoose = require('mongoose')
 mongoose.set('useCreateIndex', true)
@@ -26,11 +27,21 @@ const server = async () => {
     )
   }).parsed
 
-  config = {
-    PORT: process.env.PORT || config.PORT,
-    DB_URI: process.env.DB_URI || config.DB_URI,
-    JWT_KEY: process.env.JWT_KEY || config.JWT_KEY
-  }
+  const env = process.env.NODE_ENV || 'dev'
+  const clientEmail = config.GOOGLE_NAME
+  const privateKey = config.GOOGLE_KEY
+  const projectId = config.PROJECT_ID
+
+  const googleSecretManagerClient = new SecretManagerServiceClient({
+    credentials: {
+      client_email: clientEmail,
+      private_key: privateKey
+    }
+  })
+
+  config = googleSecretManagerClient.getSecretVersion({
+    name: `projects/${projectId}/secrets/${env}/versions/latest`
+  })
 
   const httpTransportOptions = {
     host: process.env.DG_HOST || config.DG_HOST,
