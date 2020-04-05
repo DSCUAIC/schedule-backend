@@ -17,16 +17,15 @@ exports.getAllUsers = async (req, res) => {
 }
 
 exports.getUsers = async (req, res) => {
+  // check if the current user is an admin
+  const isAdmin = req.user.admin
 
-  //check if the current user is an admin
-  let isAdmin = req.user.admin
-  
-  if(!isAdmin) {
-    //the user is not an admin
-    //get the data of the current user
+  if (!isAdmin) {
+    // the user is not an admin
+    // get the data of the current user
     try {
       const user = await req.db.User.findById(req.user['user:id'])
-      
+
       return res.status(HttpStatus.OK).json({
         success: true,
         user
@@ -39,8 +38,8 @@ exports.getUsers = async (req, res) => {
     }
   }
 
-  //the user is an admin
-  //get the data of all users based on query parameters
+  // the user is an admin
+  // get the data of all users based on query parameters
   try {
     const users = await req.db.User.find(req.query)
 
