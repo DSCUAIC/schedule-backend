@@ -4,17 +4,17 @@ const populate = async db => {
   try {
     const s1 = JSON.parse(fs.readFileSync('./data/schedule.json').toString())
 
-    const fac = await db.Faculty.create({
+    const fac = await db.Faculty.findOne({
       name: 'Facultatea de Informatica Iasi',
       shortName: 'FII'
     })
 
     const schedule = await db.Schedule.create({
-      semester: 1,
-      facultyId: fac._id.toString()
+      semester: 2,
+      faculty: fac._id
     })
 
-    fac.sem1ScheduleId = schedule._id.toString()
+    fac.sem2Schedule = schedule._id
     await fac.save()
 
     const years = []
@@ -23,8 +23,8 @@ const populate = async db => {
       const currentYear = await db.Year.create({
         semester: schedule.semester,
         year: parseInt(year),
-        facultyId: fac._id.toString(),
-        scheduleId: schedule._id.toString()
+        faculty: fac._id,
+        schedule: schedule._id
       })
 
       const days = []
@@ -32,9 +32,9 @@ const populate = async db => {
       for (const day of Object.values(s1[year])) {
         const currentDay = await db.Day.create({
           semester: schedule.semester,
-          yearId: currentYear._id.toString(),
-          facultyId: fac._id.toString(),
-          scheduleId: schedule._id.toString()
+          year: currentYear._id,
+          faculty: fac._id,
+          schedule: schedule._id
         })
 
         const courses = []
@@ -42,10 +42,10 @@ const populate = async db => {
         for (const course of day) {
           const currentCourse = await db.Course.create({
             semester: schedule.semester,
-            dayId: currentDay._id.toString(),
-            yearId: currentYear._id.toString(),
-            facultyId: fac._id.toString(),
-            scheduleId: schedule._id.toString(),
+            day: currentDay._id,
+            year: currentYear._id,
+            faculty: fac._id,
+            schedule: schedule._id,
             from: course['De la'],
             to: course['Pana la'],
             group: course.Grupa,
@@ -60,19 +60,19 @@ const populate = async db => {
           courses.push(currentCourse)
         }
 
-        currentDay.courses = courses.map(course => course._id.toString())
+        currentDay.courses = courses.map(course => course._id)
         await currentDay.save()
 
         days.push(currentDay)
       }
 
-      currentYear.days = days.map(day => day._id.toString())
+      currentYear.days = days.map(day => day._id)
       await currentYear.save()
 
       years.push(currentYear)
     }
 
-    schedule.years = years.map(year => year._id.toString())
+    schedule.years = years.map(year => year._id)
     await schedule.save()
 
     process.exit()
