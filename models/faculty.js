@@ -1,7 +1,6 @@
 const {
   Schema,
-  model,
-  mongo: { ObjectId }
+  model
 } = require('mongoose')
 
 const facultySchema = new Schema(
@@ -16,42 +15,28 @@ const facultySchema = new Schema(
       unique: true,
       required: true
     },
-    sem1ScheduleId: {
-      type: String,
-      default: null
-    },
     sem1Schedule: {
-      type: Object,
-      default: null
-    },
-    sem2ScheduleId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'schedules',
       default: null
     },
     sem2Schedule: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: 'schedules',
       default: null
     }
   },
   { timestamps: true }
 )
 
-facultySchema.statics.findOneAll = async function (query) {
-  const fac = await this.model('faculties').findOne(query)
-
-  if (fac.sem1ScheduleId) {
-    fac.sem1Schedule = await this.model('schedules').findOne({
-      _id: ObjectId(fac.sem1ScheduleId)
-    })
+facultySchema.post('find', async docs => {
+  for (const doc of docs) {
+    await doc.populate('sem1Schedule').populate('sem2Schedule').execPopulate()
   }
+})
 
-  if (fac.sem2ScheduleId) {
-    fac.sem2Schedule = await this.model('schedules').findOne({
-      _id: ObjectId(fac.sem2ScheduleId)
-    })
-  }
-
-  return fac
-}
+facultySchema.post('findOne', async doc => {
+  await doc.populate('sem1Schedule').populate('sem2Schedule').execPopulate()
+})
 
 module.exports = model('faculties', facultySchema)
