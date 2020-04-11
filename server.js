@@ -28,15 +28,21 @@ const server = async () => {
 
   config = {
     PORT: process.env.PORT || config.PORT,
-    DB_URI: process.env.DB_URI || config.DB_URI,
-    JWT_KEY: process.env.JWT_KEY || config.JWT_KEY
+    DB_URI: process.env.DB_URI || config.DB_URI
   }
 
+  await mongoose.connect(process.env.DB_URI || config.DB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+
+  config = await db.Secret.find({ NODE_ENV: process.env.NODE_ENV || 'dev' })
+
   const httpTransportOptions = {
-    host: process.env.DG_HOST || config.DG_HOST,
+    host: config.DG_HOST,
     path: `/v1/input/${
-      process.env.DG_TOKEN || config.DG_TOKEN
-    }?ddsource=nodejs&service=${process.env.DG_NAME || config.DG_NAME}`,
+      config.DG_TOKEN
+    }?ddsource=nodejs&service=${config.DG_NAME}`,
     ssl: true
   }
 
@@ -44,20 +50,15 @@ const server = async () => {
     level: 'info',
     exitOnError: false,
     format: format.json(),
-    defaultMeta: { env: process.env.NODE_ENV || 'dev' },
+    defaultMeta: { env: config.NODE_ENV },
     transports: [new transports.Http(httpTransportOptions)]
   })
 
-  if (process.env.NODE_ENV === 'dev') {
+  if (config.NODE_ENV === 'dev') {
     logger.add(new transports.Console({ format: format.simple() }))
   }
 
   const app = express()
-
-  await mongoose.connect(config.DB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
 
   // Middlewares
   app.use(cors())
