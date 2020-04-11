@@ -15,4 +15,6 @@ router.get(
   scheduleController.getYearSemesterSchedule
 )
 
+router.get('/', scheduleController.getScheduleWithParams)
+
 module.exports = router
