@@ -1,5 +1,6 @@
 const HttpStatus = require('http-status-codes')
 const bcrypt = require('bcrypt')
+const mongoose = require('mongoose')
 
 const { saltRounds } = require('../utils').constants
 
@@ -93,6 +94,33 @@ exports.changePassword = async (req, res) => {
     })
   } catch (error) {
     req.log.error(`Unable to change password -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+exports.deleteUser = async (req, res) => {
+  try {
+    var userId = mongoose.Types.ObjectId(req.params)
+
+    const result = await req.db.User.deleteOne(userId)
+
+    if(result) {
+      return res.json({
+        success: true,
+        message: 'User deleted successfully'
+      })
+    }
+      
+    return res.json({
+      success: false,
+      message: 'User not found'
+    })
+    
+  } catch (error) {
+    req.log.error(`Unable to delete user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message
