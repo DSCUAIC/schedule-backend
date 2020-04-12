@@ -5,6 +5,7 @@ const compression = require('compression')
 const HttpStatus = require('http-status-codes')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
+const Cryptr = require('cryptr')
 
 const mongoose = require('mongoose')
 mongoose.set('useCreateIndex', true)
@@ -18,7 +19,7 @@ const db = require('./models')
 const router = require('./routes')
 
 const server = async () => {
-  let config = dotenv.config({
+  const config = dotenv.config({
     path: path.join(
       process.cwd(),
       'configs',
@@ -26,17 +27,17 @@ const server = async () => {
     )
   }).parsed
 
-  config = {
-    PORT: process.env.PORT || config.PORT,
-    DB_URI: process.env.DB_URI || config.DB_URI
-  }
+  const cryptr = new Cryptr(config.SECRET_KEY)
 
   await mongoose.connect(process.env.DB_URI || config.DB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
 
-  config = await db.Secret.find({ NODE_ENV: process.env.NODE_ENV || 'dev' })
+  const secrets = await db.Secret.find({ env: process.env.NODE_ENV || 'dev' })
+  for (var secret of secrets) {
+    config[secret.key] = cryptr.decrypt(secret.value)
+  }
 
   const httpTransportOptions = {
     host: config.DG_HOST,
@@ -54,7 +55,7 @@ const server = async () => {
     transports: [new transports.Http(httpTransportOptions)]
   })
 
-  if (config.NODE_ENV === 'dev') {
+  if (process.env.NODE_ENV === 'dev' || config.NODE_ENV === 'dev') {
     logger.add(new transports.Console({ format: format.simple() }))
   }
 
