@@ -1,4 +1,7 @@
 const HttpStatus = require('http-status-codes')
+const bcrypt = require('bcrypt')
+
+const { saltRounds } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -48,7 +51,9 @@ exports.getUsers = async (req, res) => {
       users
     })
   } catch (error) {
-    req.log.error(`Unable to get users based on queries -> ${req.url} -> ${error}`)
+    req.log.error(
+      `Unable to get users based on queries -> ${req.url} -> ${error}`
+    )
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
@@ -68,12 +73,21 @@ exports.updateUser = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const { oldPass, newPass } = req.body
-    const userToSearchFor = { email: req.user.email }
-    const user = await req.db.User.findOne(userToSearchFor)
-    if (user.password !== oldPass) {
-      throw new Error('Wrong password!')
+    const { email } = req.user
+
+    const user = await req.db.User.findOne({ email })
+
+    if (!bcrypt.compareSync(oldPass, user.password)) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        success: false,
+        message: 'Incorrect password!'
+      })
     }
-    await req.db.User.updateOne(userToSearchFor, { password: newPass })
+
+    const password = bcrypt.hashSync(newPass, saltRounds)
+
+    await req.db.User.updateOne({ email }, { password })
+
     return res.json({
       success: true
     })

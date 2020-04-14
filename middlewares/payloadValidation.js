@@ -7,7 +7,6 @@ const payloadValidation = schema => async (req, res, next) => {
     await schema.validateAsync(payload)
     next()
   } catch (error) {
-    console.error(error)
     return res.status(HttpStatus.BAD_REQUEST).json({
       success: false,
       message: error.message
