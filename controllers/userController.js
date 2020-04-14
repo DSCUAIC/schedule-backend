@@ -64,21 +64,9 @@ exports.createUser = async (req, res) => {
 
     delete user._doc.password
 
-    const token = createTkn(
-      { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
-      req.config.JWT_KEY
-    )
-
-    sendEmail({
-      config: req.config,
-      to: req.body.email,
-      template: 'welcome',
-      vars: { firstName: req.body.firstname, lastName: req.body.lastname }
-    })
-
     return res.json({
       success: true,
-      token
+      message: 'User created'
     })
   } catch (error) {
     req.log.error(`Unable to create user -> ${error}`)
