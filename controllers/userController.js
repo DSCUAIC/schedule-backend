@@ -1,6 +1,4 @@
 const HttpStatus = require('http-status-codes')
-const { createTkn } = require('../utils')
-const sendEmail = require('../utils/sendMail')
 
 exports.getAllUsers = async (req, res) => {
   try {
