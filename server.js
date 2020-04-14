@@ -5,7 +5,7 @@ const compression = require('compression')
 const HttpStatus = require('http-status-codes')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
-const { SecretManagerServiceClient } = require('@google-cloud/secret-manager')
+const Cryptr = require('cryptr')
 
 const mongoose = require('mongoose')
 mongoose.set('useCreateIndex', true)
@@ -27,27 +27,29 @@ const server = async () => {
     )
   }).parsed
 
-  const env = process.env.NODE_ENV || 'dev'
-  const clientEmail = config.GOOGLE_NAME
-  const privateKey = config.GOOGLE_KEY
-  const projectId = config.PROJECT_ID
+  config = {
+    PORT: process.env.PORT || config.PORT,
+    DB_URI: process.env.DB_URI || config.DB_URI,
+    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY
+  }
 
-  const googleSecretManagerClient = new SecretManagerServiceClient({
-    credentials: {
-      client_email: clientEmail,
-      private_key: privateKey
-    }
+  const cryptr = new Cryptr(config.SECRET_KEY)
+
+  await mongoose.connect(process.env.DB_URI || config.DB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
   })
 
-  config = googleSecretManagerClient.getSecretVersion({
-    name: `projects/${projectId}/secrets/${env}/versions/latest`
-  })
+  const secrets = await db.Secret.find({ env: process.env.NODE_ENV || 'dev' })
+  for (var secret of secrets) {
+    config[secret.key] = cryptr.decrypt(secret.value)
+  }
 
   const httpTransportOptions = {
-    host: process.env.DG_HOST || config.DG_HOST,
+    host: config.DG_HOST,
     path: `/v1/input/${
-      process.env.DG_TOKEN || config.DG_TOKEN
-    }?ddsource=nodejs&service=${process.env.DG_NAME || config.DG_NAME}`,
+      config.DG_TOKEN
+    }?ddsource=nodejs&service=${config.DG_NAME}`,
     ssl: true
   }
 
@@ -55,20 +57,15 @@ const server = async () => {
     level: 'info',
     exitOnError: false,
     format: format.json(),
-    defaultMeta: { env: process.env.NODE_ENV || 'dev' },
+    defaultMeta: { env: config.NODE_ENV },
     transports: [new transports.Http(httpTransportOptions)]
   })
 
-  if (process.env.NODE_ENV === 'dev') {
+  if (process.env.NODE_ENV === 'dev' || config.NODE_ENV === 'dev') {
     logger.add(new transports.Console({ format: format.simple() }))
   }
 
   const app = express()
-
-  await mongoose.connect(config.DB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
 
   // Middlewares
   app.use(cors())

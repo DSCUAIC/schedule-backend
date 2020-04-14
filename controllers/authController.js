@@ -14,7 +14,7 @@ exports.login = async (req, res) => {
       })
     }
 
-    if (bcrypt.compareSync(req.body.password, user.password)) {
+    if (!bcrypt.compareSync(req.body.password, user.password)) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
         message: 'Incorrect password!'
