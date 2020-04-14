@@ -8,7 +8,6 @@ const helmet = require('helmet')
 const Cryptr = require('cryptr')
 
 const mongoose = require('mongoose')
-mongoose.set('useCreateIndex', true)
 
 const path = require('path')
 
@@ -37,7 +36,8 @@ const server = async () => {
 
   await mongoose.connect(process.env.DB_URI || config.DB_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex: true
   })
 
   const secrets = await db.Secret.find({ env: process.env.NODE_ENV || 'dev' })
