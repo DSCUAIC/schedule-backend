@@ -26,19 +26,13 @@ const server = async () => {
     )
   }).parsed
 
-  console.log('config', config)
-
-  console.log('PORT', process.env.PORT)
-  console.log('DB_URI', process.env.DB_URI)
-  console.log('ENV', process.env)
-
   config = {
     PORT: process.env.PORT || config.PORT,
     DB_URI: process.env.DB_URI || config.DB_URI,
-    SERVER_KEY: process.env.SERVER_KEY || config.SERVER_KEY
+    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY
   }
 
-  const cryptr = new Cryptr(config.SERVER_KEY)
+  const cryptr = new Cryptr(config.SECRET_KEY)
 
   await mongoose.connect(process.env.DB_URI || config.DB_URI, {
     useNewUrlParser: true,

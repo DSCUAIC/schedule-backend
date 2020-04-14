@@ -3,7 +3,7 @@ const Cryptr = require('cryptr')
 
 exports.addSecret = async (req, res) => {
   try {
-    const cryptr = new Cryptr(req.config.SERVER_KEY)
+    const cryptr = new Cryptr(req.config.SECRET_KEY)
     const isAdmin = req.user.admin
     if (!isAdmin) {
       throw new Error('Access denied. You must be an admin!')
@@ -37,7 +37,7 @@ exports.addSecret = async (req, res) => {
 
 exports.updateSecret = async (req, res) => {
   try {
-    const cryptr = new Cryptr(req.config.SERVER_KEY)
+    const cryptr = new Cryptr(req.config.SECRET_KEY)
     const isAdmin = req.user.admin
     if (!isAdmin) {
       throw new Error('Access denied. You must be an admin!')
@@ -71,7 +71,7 @@ exports.updateSecret = async (req, res) => {
 
 exports.deleteSecret = async (req, res) => {
   try {
-    const cryptr = new Cryptr(req.config.SERVER_KEY)
+    const cryptr = new Cryptr(req.config.SECRET_KEY)
     const isAdmin = req.user.admin
     if (!isAdmin) {
       throw new Error('Access denied. You must be an admin!')
