@@ -58,9 +58,7 @@ exports.createUser = async (req, res) => {
       })
     }
 
-    const user = await req.db.User.create(req.body)
-
-    delete user._doc.password
+    req.db.User.create(req.body)
 
     return res.json({
       success: true,
