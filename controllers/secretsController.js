@@ -1,20 +1,9 @@
 const HttpStatus = require('http-status-codes')
 const Cryptr = require('cryptr')
-const dotenv = require('dotenv')
-const path = require('path')
-
-const config = dotenv.config({
-  path: path.join(
-    process.cwd(),
-    'configs',
-    `${process.env.NODE_ENV || 'dev'}.env`
-  )
-}).parsed
-
-const cryptr = new Cryptr(config.SECRET_KEY)
 
 exports.addSecret = async (req, res) => {
   try {
+    const cryptr = new Cryptr(req.config.SECRET_KEY)
     const isAdmin = req.user.admin
     if (!isAdmin) {
       throw new Error('Access denied. You must be an admin!')
@@ -43,6 +32,7 @@ exports.addSecret = async (req, res) => {
 
 exports.updateSecret = async (req, res) => {
   try {
+    const cryptr = new Cryptr(req.config.SECRET_KEY)
     const isAdmin = req.user.admin
     if (!isAdmin) {
       throw new Error('Access denied. You must be an admin!')
@@ -71,6 +61,7 @@ exports.updateSecret = async (req, res) => {
 
 exports.deleteSecret = async (req, res) => {
   try {
+    const cryptr = new Cryptr(req.config.SECRET_KEY)
     const isAdmin = req.user.admin
     if (!isAdmin) {
       throw new Error('Access denied. You must be an admin!')
