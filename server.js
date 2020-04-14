@@ -26,11 +26,11 @@ const server = async () => {
     )
   }).parsed
 
-  console.log(config)
+  console.log('config', config)
 
-  console.log(process.env.PORT)
-  console.log(process.env.DB_URI)
-  console.log(process.env.SERVER_KEY)
+  console.log('PORT', process.env.PORT)
+  console.log('DB_URI', process.env.DB_URI)
+  console.log('ENV', process.env)
 
   config = {
     PORT: process.env.PORT || config.PORT,
