@@ -70,8 +70,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint && npm run depcheck",
-      "pre-push": "npm run test"
+      "pre-commit": "npm run lint && npm run depcheck && npm run test"
     }
   }
 }
