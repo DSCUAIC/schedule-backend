@@ -29,10 +29,10 @@ const server = async () => {
   config = {
     PORT: process.env.PORT || config.PORT,
     DB_URI: process.env.DB_URI || config.DB_URI,
-    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY
+    SERVER_KEY: process.env.SERVER_KEY || config.SERVER_KEY
   }
 
-  const cryptr = new Cryptr(config.SECRET_KEY)
+  const cryptr = new Cryptr(config.SERVER_KEY)
 
   await mongoose.connect(process.env.DB_URI || config.DB_URI, {
     useNewUrlParser: true,
@@ -47,9 +47,7 @@ const server = async () => {
 
   const httpTransportOptions = {
     host: config.DG_HOST,
-    path: `/v1/input/${
-      config.DG_TOKEN
-    }?ddsource=nodejs&service=${config.DG_NAME}`,
+    path: `/v1/input/${config.DG_TOKEN}?ddsource=nodejs&service=${config.DG_NAME}`,
     ssl: true
   }
 
