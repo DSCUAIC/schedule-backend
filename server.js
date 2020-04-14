@@ -19,13 +19,19 @@ const db = require('./models')
 const router = require('./routes')
 
 const server = async () => {
-  const config = dotenv.config({
+  let config = dotenv.config({
     path: path.join(
       process.cwd(),
       'configs',
       `${process.env.NODE_ENV || 'dev'}.env`
     )
   }).parsed
+
+  config = {
+    PORT: process.env.PORT || config.PORT,
+    DB_URI: process.env.DB_URI || config.DB_URI,
+    JWT_KEY: process.env.SECRET_KEY || config.SECRET_KEY
+  }
 
   const cryptr = new Cryptr(config.SECRET_KEY)
 
