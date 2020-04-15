@@ -70,7 +70,8 @@ exports.requireAuth = () => {
       })
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false
+        success: false,
+        message: error
       })
     }
   }
