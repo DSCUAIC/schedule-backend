@@ -99,3 +99,28 @@ exports.changePassword = async (req, res) => {
     })
   }
 }
+
+exports.createUser = async (req, res) => {
+  try {
+    const existingUser = await req.db.User.findOne({ email: req.body.email })
+
+    if (existingUser) {
+      return res.status(HttpStatus.CONFLICT).json({
+        success: false,
+        message: 'User already exists!'
+      })
+    }
+
+    req.db.User.create(req.body)
+
+    return res.json({
+      success: true,
+      message: 'User created'
+    })
+  } catch (error) {
+    req.log.error(`Unable to create user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
