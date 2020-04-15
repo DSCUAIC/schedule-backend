@@ -110,13 +110,11 @@ describe("GET /schedule", () => {
                 expect(response.body).toHaveProperty('success')
                 expect(response.body.success).toEqual(true)
                 expect(response.body).toHaveProperty('schedule')
-                console.log(response.body.schedule['sem1']['Luni'][0]['Grupa'])
                 // deep check
                 for(const sem in response.body.schedule){
                     for(const day in response.body.schedule[sem]){
                         for(const course in response.body.schedule[sem][day]){
                             expect(response.body.schedule[sem][day][course]).toHaveProperty('Grupa')
-                            //console.log(response.body.schedule[sem][day][course])
                             expect(response.body.schedule[sem][day][course]['Grupa']).toContain('I' + year)
                         }
                     }
