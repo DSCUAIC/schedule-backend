@@ -101,6 +101,48 @@ describe("GET /schedule", () => {
             })
         })
 
+        describe('GET /schedule/year/:yearNumber', () => {
+            test.each([1, 2, 3])('GET for year %i', async (year) => {
+                const response = await server.get('/schedule/year/' + year)
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                console.log(response.body.schedule['sem1']['Luni'][0]['Grupa'])
+                // deep check
+                for(const sem in response.body.schedule){
+                    for(const day in response.body.schedule[sem]){
+                        for(const course in response.body.schedule[sem][day]){
+                            expect(response.body.schedule[sem][day][course]).toHaveProperty('Grupa')
+                            //console.log(response.body.schedule[sem][day][course])
+                            expect(response.body.schedule[sem][day][course]['Grupa']).toContain('I' + year)
+                        }
+                    }
+                }
+            })
+
+            test('Give wrong year number', async () => {
+                const response = await server.get('/schedule/year/023235')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid year number')
+            })
+
+            test('Give no year number', async () => {
+                const response = await server.get('/schedule/year/')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Route /schedule/year/ Not found.')
+            })
+        })
     })
 })
 
