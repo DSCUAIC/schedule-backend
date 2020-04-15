@@ -17,12 +17,7 @@ jobs:
         env:
           PORT: 3000
           DB_URI: ${{ secrets.DB_URI }}
-          JWT_KEY: ${{ secrets.JWT_KEY }}
-          DG_HOST: ${{ secrets.DG_HOST }}
-          DG_TOKEN: ${{ secrets.DG_TOKEN }}
-          DG_NAME: ${{ secrets.DG_NAME }}
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - name: Run codacy-coverage-reporter
         uses: mrfyda/codacy-coverage-reporter-action@master
         with:

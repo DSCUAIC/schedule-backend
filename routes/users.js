@@ -4,7 +4,7 @@ const { userController } = require('../controllers')
 const { payloadValidation, requireAdmin } = require('../middlewares')
 const { updateUser, changePassword, register } = require('../schemas').users
 
-router.get('/', userController.getAllUsers)
+router.get('/', userController.getUsers)
 router.patch('/', payloadValidation(updateUser), userController.updateUser)
 router.patch(
   '/change_password',
