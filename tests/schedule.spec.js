@@ -199,14 +199,14 @@ describe("GET /schedule", () => {
                 expect(response.body).toHaveProperty('schedule')
                 
                 for(const day in response.body.schedule){
-                    
-                    if(response.body.schedule[day][course]['Tip'] === 'Curs'){
-                        expect(response.body.schedule[day][course]['Grupa']).toContain('I1E')
-                        doWeGetCourses = true
-                    }
-                    
-                    else
-                        expect(response.body.schedule[day][course]['Grupa']).toContain('I1E3')
+                    for(const course in response.body.schedule[day]){
+                        if(response.body.schedule[day][course]['Tip'] == 'Curs'){
+                            expect(response.body.schedule[day][course]['Grupa']).toContain('I1E')
+                            doWeGetCourses = true
+                        }
+                        
+                        else
+                            expect(response.body.schedule[day][course]['Grupa']).toContain('I1E3')
                     }
                 }
 
