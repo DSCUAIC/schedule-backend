@@ -187,7 +187,7 @@ exports.getGroupSchedule = async (req, res) => {
       schedule[yearNumber]
     )) {
       const weekDayClasses = weekDaySchedule.filter(weekDayClass =>
-        weekDayClass.Grupa.endsWith(groupName)
+        weekDayClass.Grupa.indexOf(groupName) !== -1 || weekDayClass.Grupa.indexOf(groupName.substring(0, groupName.length)) !== -1
       )
       classes[weekDay] = weekDayClasses
 
