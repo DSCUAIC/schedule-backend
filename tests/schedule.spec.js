@@ -102,7 +102,7 @@ describe("GET /schedule", () => {
         })
 
         describe('GET /schedule/year/:yearNumber', () => {
-            test.each([1, 2, 3])('GET for year %i', async (year) => {
+            test.each([1, 2, 3])('Should return the schedule for year %i', async (year) => {
                 const response = await server.get('/schedule/year/' + year)
                 .set('Authorization', `Bearer ${token}`)
 
@@ -132,13 +132,122 @@ describe("GET /schedule", () => {
                 expect(response.body.message).toEqual('Invalid year number')
             })
 
-            test('Give no year number', async () => {
+           test('Give no year number', async () => {
                 const response = await server.get('/schedule/year/')
                 .set('Authorization', `Bearer ${token}`)
 
                 expect(response.status).toEqual(httpStatus.NOT_FOUND)
                 expect(response.body).toHaveProperty('message')
                 expect(response.body.message).toEqual('Route /schedule/year/ Not found.')
+            })
+        })
+
+        describe('GET /schedule/year/:yearNumber/semester/:semesterNumber', () => {
+            test.each([ [1, 1], [1, 2],
+                        [2, 1], [2, 2],
+                        [3, 1], [3, 2]])('Should return the schedule for year %d, semester %d', async (year, semester) => {
+                const response = await server.get('/schedule/year/' + year + '/semester/' + semester)
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+
+                // can't really check whether the semester is right, hence there's no clear pattern in the response data. I'll check the year, though.
+                for(const day in response.body.schedule){
+                    for(const course in response.body.schedule[day]){
+                        expect(response.body.schedule[day][course]).toHaveProperty('Grupa')
+                        expect(response.body.schedule[day][course]['Grupa']).toContain('I' + year)
+                    }
+                }
+            })
+
+            test('Give wrong year number', async () => {
+                const response = await server.get('/schedule/year/0/semester/1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid year number')
+            })
+
+            test('Give wrong semester number', async () => {
+                const response = await server.get('/schedule/year/1/semester/0')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid semester number')
+            })
+        })
+
+        describe('GET /schedule/year/:yearNumber/semester/:semesterNumber/group/:groupName', () => {
+            
+            test('Should return schedule for the first semester, for I1E3', async () => {
+                let doWeGetCourses = false;
+                const response = await server.get('/schedule/year/1/semester/1/group/E3')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                
+                for(const day in response.body.schedule){
+                    for(const course in response.body.schedule[day]){
+                        if(response.body.schedule[day][course]['Tip'] == 'Seminar')
+                            expect(response.body.schedule[day][course]['Grupa']).toContain('I1E3')
+                        
+                        else{
+                            expect(response.body.schedule[day][course]['Grupa']).toContain('I1E')
+                            doWeGetCourses = true
+                        }
+                    }
+                }
+
+                // finally, check that we do, in fact, also get the courses
+                expect(doWeGetCourses).toEqual(true)
+            })
+
+            test('Give wrong year number', async () => {
+                let doWeGetCourses = false;
+                const response = await server.get('/schedule/year/0/semester/1/group/E3')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid year number')
+            })
+
+            test('Give wrong semester number', async () => {
+                let doWeGetCourses = false;
+                const response = await server.get('/schedule/year/1/semester/0/group/E3')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid semester number')
+            })
+
+            test('Give wrong group name', async () => {
+                let doWeGetCourses = false;
+                const response = await server.get('/schedule/year/1/semester/1/group/This%20should%20really%20not%20be%20here')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid group name')
             })
         })
     })
