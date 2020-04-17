@@ -24,7 +24,7 @@ const fields = [
 (async () => {
   try {
     for (let year = 0; year < 3; year++) {
-      const html = await axios.get(urls[year]);
+      const html = await axios.get(urls[year])
       const $ = cheerio.load(html.data)
       const table = $('tr')
 
@@ -35,33 +35,34 @@ const fields = [
         if ($(table[row]).children().length === 1) {
           day = $(table[row]).children().text().trim()
           schedule[year + 1][day] = []
-        }
-        else {
-          let course = {}
+        } else {
+          const course = {}
           for (let index = 0; index < $(table[row]).children().length; index++) {
             const child = $(table[row]).children().get(index)
             if ($(child).children().length) {
-              tags = $(child).children('a')
+              const tags = $(child).children('a')
               course[fields[index]] = ''
               for (let elem = 0; elem < tags.length; elem++) {
-                if (course[fields[index]] !== '')
+                if (course[fields[index]] !== '') {
                   course[fields[index]] += ', '
+                }
                 course[fields[index]] += $(tags[elem]).text().trim()
               }
-            }
-            else
+            } else {
               course[fields[index]] = $(child).text().trim()
+            }
           }
           schedule[year + 1][day].push(course)
         }
       }
     }
 
-    fs.writeFile("./data/scheduleFII2.json", JSON.stringify(schedule, null, 2), 'utf8', (err) => {
-      if (err)
+    fs.writeFile('./data/scheduleFII2.json', JSON.stringify(schedule, null, 2), 'utf8', (err) => {
+      if (err) {
         console.error(err)
-      else
+      } else {
         console.log('Data scraped successfully')
+      }
     })
   } catch (error) {
     console.error(error)
