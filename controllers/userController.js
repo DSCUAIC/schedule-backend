@@ -1,7 +1,10 @@
 const HttpStatus = require('http-status-codes')
 const bcrypt = require('bcrypt')
+const {
+  mongo: { ObjectId }
+} = require('mongoose')
 
-const { saltRounds } = require('../utils').constants
+const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -119,6 +122,34 @@ exports.createUser = async (req, res) => {
     })
   } catch (error) {
     req.log.error(`Unable to create user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    if (!req.user[resetClaim]) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        success: false
+      })
+    }
+
+    const { password } = req.body
+
+    const newPassword = bcrypt.hashSync(password, saltRounds)
+
+    await req.db.User.updateOne(
+      { _id: ObjectId(req.user[idClaim]) },
+      { password: newPassword }
+    )
+
+    return res.json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to reset password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })
