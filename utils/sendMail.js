@@ -4,7 +4,7 @@ const constants = require('./constants')
 const { templates } = constants
 
 const sendEmail = function ({ config, to, template, vars }) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY || config.SENDGRID_API_KEY)
+  sgMail.setApiKey(config.SENDGRID_API_KEY)
 
   const msg = {
     to,
