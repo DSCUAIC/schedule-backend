@@ -7,12 +7,12 @@ const app = require('../server');
 let token;
 let response;
 let user = {
-  email: 'alex.marcu2112@gmail.com',
-  password: 'parola12',
-  username: 'alex.marcu'
+  email: 'test@test.com',
+  password: '1234567',
+  username: 'login.test'
 }
 
-describe('User Routes Get Users', () => {
+describe('User Routes Get User', () => {
 
   beforeAll(async () => {
     server = supertest.agent(await app())
@@ -31,7 +31,7 @@ describe('User Routes Get Users', () => {
     await mongoose.disconnect()
   })
 
-  test('get all users should return ok', async () => {
+  test('get user should return ok', async () => {
     try {
       response = await server.get('/users')
         .set({ Authorization: token })
@@ -42,6 +42,30 @@ describe('User Routes Get Users', () => {
     }
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.OK);
+  });
+
+  test('get user without token should be unauthorized', async () => {
+    try {
+      response = await server.get('/users')
+        .send();
+
+    } catch (err) {
+      console.log(err);
+    }
+    expect(response).toHaveProperty('status');
+    expect(response.status).toEqual(HttpStatus.UNAUTHORIZED);
+  });
+
+  test('get user should return current user`s details', async () => {
+    try {
+      response = await server.get('/users')
+        .set({ Authorization: token })
+        .send();
+
+    } catch (err) {
+      console.log(err);
+    }
+    expect(response.body.user.email).toEqual(user.email);
   });
 });
 
@@ -79,29 +103,29 @@ describe('User Routes Change Password', () => {
   })
 
   test('change password for an existing user using correct password should return ok', async () => {
-    let response = await sendChangePasswordRequest(user.password, 'parola123')
+    let response = await sendChangePasswordRequest(user.password, '12345678')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.OK);
-    response = await sendChangePasswordRequest('parola123', user.password);
+    response = await sendChangePasswordRequest('12345678', user.password);
   });
 
   test('change password for an existing user with wrong current pass should fail', async () => {
-    let response = await sendChangePasswordRequest('parola1', 'parola1234')
+    let response = await sendChangePasswordRequest('wrongPass', 'newPass')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.UNAUTHORIZED);
   });
 
   test('change password for an existing user with empty current pass should fail', async () => {
-    let response = await sendChangePasswordRequest('', 'parola1234')
+    let response = await sendChangePasswordRequest('', 'newPass')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
   });
 
   test('change password for an existing user with empty new pass should fail', async () => {
-    let response = await sendChangePasswordRequest('parola12', '')
+    let response = await sendChangePasswordRequest('1234567', '')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
@@ -129,7 +153,7 @@ describe('User Routes Change Password', () => {
       response = await server.patch(`/users/change_password`)
         .set({ Authorization: token })
         .send({
-          newPass: 'parola123'
+          newPass: 'newPass'
         });
     } catch (err) {
       console.log(err);
