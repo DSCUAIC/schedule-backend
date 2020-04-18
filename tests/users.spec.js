@@ -103,7 +103,7 @@ describe('User Routes Change Password', () => {
   })
 
   test('change password for an existing user using correct password should return ok', async () => {
-    let response = await sendChangePasswordRequest(user.password, '12345678')
+    response = await sendChangePasswordRequest(user.password, '12345678')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.OK);
@@ -111,28 +111,27 @@ describe('User Routes Change Password', () => {
   });
 
   test('change password for an existing user with wrong current pass should fail', async () => {
-    let response = await sendChangePasswordRequest('wrongPass', 'newPass')
+    response = await sendChangePasswordRequest('wrongPass', 'newPass')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.UNAUTHORIZED);
   });
 
   test('change password for an existing user with empty current pass should fail', async () => {
-    let response = await sendChangePasswordRequest('', 'newPass')
+    response = await sendChangePasswordRequest('', 'newPass')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
   });
 
   test('change password for an existing user with empty new pass should fail', async () => {
-    let response = await sendChangePasswordRequest('1234567', '')
+    response = await sendChangePasswordRequest('1234567', '')
 
     expect(response).toHaveProperty('status');
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
   });
 
   test('change password for an existing user without current pass should fail', async () => {
-    let response;
     try {
       response = await server.patch(`/users/change_password`)
         .set({ Authorization: token })
@@ -148,7 +147,6 @@ describe('User Routes Change Password', () => {
   });
 
   test('change password for an existing user without new pass should fail', async () => {
-    let response;
     try {
       response = await server.patch(`/users/change_password`)
         .set({ Authorization: token })
