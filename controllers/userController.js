@@ -2,6 +2,7 @@ const HttpStatus = require('http-status-codes')
 const bcrypt = require('bcrypt')
 
 const { saltRounds } = require('../utils').constants
+const cloudinary = require("cloudinary")
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -121,6 +122,33 @@ exports.createUser = async (req, res) => {
     req.log.error(`Unable to create user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
+    })
+  }
+}
+exports.changeProfileImage = async (req,res) =>{
+  try {
+    const { path } = req.file;
+    const { email } = req.user
+    
+    const user = await req.db.User.findOne({ email })
+    if (user.profileImage.id)
+      await cloudinary.v2.uploader.destroy(user.profileImage.id)
+    let result = await cloudinary.v2.uploader.upload(path)
+    profileImage ={
+      id :result.public_id,
+      path:  result.secure_url
+    }  
+
+    await req.db.User.updateOne({ email }, { profileImage })
+
+    return res.json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to change profile image-> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message
     })
   }
 }
