@@ -250,6 +250,97 @@ describe("GET /schedule", () => {
                 expect(response.body.message).toEqual('Invalid group name')
             })
         })
+
+        describe('GET /schedule/', () => {
+            test('provide no parameters', async () => {
+                const response = await server.get('/schedule')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).toHaveProperty('FII')
+                expect(response.body.schedule.FII).toHaveProperty('sem1')
+                expect(response.body.schedule.FII).toHaveProperty('sem2')
+            })
+
+            test.skip('provide wrong faculty', async () => {
+                const response = await server.get('/schedule?faculty=FI')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).toBe(null)
+            })
+
+            test('provide only faculty', async () => {
+                const response = await server.get('/schedule?faculty=FII')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).toHaveProperty('sem1')
+                expect(response.body.schedule).toHaveProperty('sem2')
+            })
+
+            test('provide wrong semester', async () => {
+                const response = await server.get('/schedule?faculty=FII&semester=0')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.NOT_FOUND)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Invalid semester number')
+            })
+
+            test.skip('provide semester', async () => {
+                const response = await server.get('/schedule?faculty=FII&semester=1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+            })
+
+            test('provide wrong year', async () => {
+                const response = await server.get('/schedule?faculty=FII&year=0')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                //expect(response.body.schedule).toEqual()
+            })
+
+            test('provide year', async () => {
+                const response = await server.get('/schedule?faculty=FII&year=1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).toHaveProperty('sem1')
+                expect(response.body.schedule).toHaveProperty('sem2')
+                
+                // deep check
+
+                for(const sem in response.body.schedule)
+                    for(const day in response.body.schedule[sem])
+                        for(const course in response.body.schedule[sem][day])
+                            expect(response.body.schedule[sem][day][course]['Grupa']).toContain('I1')
+            })
+
+
+        })
         
     })
 })
