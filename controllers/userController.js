@@ -2,7 +2,7 @@ const HttpStatus = require('http-status-codes')
 const bcrypt = require('bcrypt')
 
 const { saltRounds } = require('../utils').constants
-const cloudinary = require("cloudinary")
+const cloudinary = require('cloudinary')
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -125,19 +125,18 @@ exports.createUser = async (req, res) => {
     })
   }
 }
-exports.changeProfileImage = async (req,res) =>{
+exports.changeProfileImage = async (req, res) => {
   try {
-    const { path } = req.file;
+    const { path } = req.file
     const { email } = req.user
-    
+
     const user = await req.db.User.findOne({ email })
-    if (user.profileImage.id)
-      await cloudinary.v2.uploader.destroy(user.profileImage.id)
-    let result = await cloudinary.v2.uploader.upload(path)
-    profileImage ={
-      id :result.public_id,
-      path:  result.secure_url
-    }  
+    if (user.profileImage.id) { await cloudinary.v2.uploader.destroy(user.profileImage.id) }
+    const result = await cloudinary.v2.uploader.upload(path)
+    const profileImage = {
+      id: result.public_id,
+      path: result.secure_url
+    }
 
     await req.db.User.updateOne({ email }, { profileImage })
 

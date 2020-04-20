@@ -48,13 +48,13 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
-    profileImage:{
-      id:{
-        type:String,
+    profileImage: {
+      id: {
+        type: String,
         default: null
       },
-      path:{
-        type:String,
+      path: {
+        type: String,
         default: null
       }
     }

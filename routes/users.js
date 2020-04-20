@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const { userController } = require('../controllers')
 
-const { payloadValidation, requireAdmin , upload } = require('../middlewares')
+const { payloadValidation, requireAdmin, upload } = require('../middlewares')
 const { updateUser, changePassword, register } = require('../schemas').users
 
 router.get('/', userController.getUsers)
