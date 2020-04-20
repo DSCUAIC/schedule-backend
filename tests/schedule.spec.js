@@ -200,7 +200,7 @@ describe("GET /schedule", () => {
                 
                 for(const day in response.body.schedule){
                     for(const course in response.body.schedule[day]){
-                        if(response.body.schedule[day][course]['Tip'] == 'Curs'){
+                        if(response.body.schedule[day][course]['Tip'] === 'Curs'){
                             expect(response.body.schedule[day][course]['Grupa']).toContain('I1E')
                             doWeGetCourses = true
                         }
