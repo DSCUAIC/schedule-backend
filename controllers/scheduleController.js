@@ -298,9 +298,6 @@ exports.getScheduleWithParams = async (req, res) => {
     if (dayNum) {
       const days = dayNum.split(',')
       let daysText = []
-      daysText = undefined
-      daysText = []
-      daysText.splice(0, 1)
       for (let index = 0; index < days.length; index++) {
         if (daysRo[days[index]] === undefined) {
           days.splice(index, 1)
@@ -389,52 +386,34 @@ exports.getScheduleWithParams = async (req, res) => {
     }
 
     // removes day key from ret if parameter is set and doesn't contain a comma
-    if (dayNum && dayNum.split(',').length === 1) {
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          for (const y in ret[fac][sem]) {
-            const aux = ret[fac][sem][y][daysRo[dayNum]]
-            delete ret[fac][sem][y][daysRo[dayNum]]
-            ret[fac][sem][y] = aux
-          }
-        }
-      }
-    }
+    if (dayNum && dayNum.split(',').length === 1)
+      for (const fac in ret)
+        for (const sem in ret[fac])
+          for (const y in ret[fac][sem])
+            ret[fac][sem][y] = ret[fac][sem][y][daysRo[dayNum]]
+
 
     // removes year key from ret if parameter is set and doesn't contain a comma
-    if (year && year.split(',').length === 1) {
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          const aux = ret[fac][sem][year]
-          delete ret[fac][sem][year]
-          ret[fac][sem] = aux
-        }
-      }
-    }
+    if (year && year.split(',').length === 1)
+      for (const fac in ret)
+        for (const sem in ret[fac])
+          ret[fac][sem] = ret[fac][sem][year]
+
 
     // removes sem1/2 key from ret if parameter is set
-    if (semester) {
-      if (semester === '1') {
-        for (const fac in ret) {
-          const aux = ret[fac].sem1
-          delete ret[fac].sem1
-          ret[fac] = aux
-        }
-      } else {
-        for (const fac in ret) {
-          const aux = ret[fac].sem2
-          delete ret[fac].sem2
-          ret[fac] = aux
-        }
-      }
-    }
+    if (semester)
+      if (semester === '1')
+        for (const fac in ret)
+          ret[fac] = ret[fac].sem1
+
+      else
+        for (const fac in ret)
+          ret[fac] = ret[fac].sem2
+
 
     // removes faculty key from ret if parameter is set and doesn't contain a comma
-    if (faculty && faculty.split(',').length === 1) {
-      const aux = ret[faculty]
-      delete ret[faculty]
-      ret = aux
-    }
+    if (faculty && faculty.split(',').length === 1)
+      ret = ret[faculty]
 
     return res.status(HttpStatus.OK).json({
       success: true,
