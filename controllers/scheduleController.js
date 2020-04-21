@@ -251,7 +251,7 @@ exports.getScheduleWithParams = async (req, res) => {
     if (faculty && faculty !== 'FII') {
       return res.status(HttpStatus.OK).json({
         success: true,
-        schedule: {}
+        schedule: null
       })
     }
 
@@ -290,8 +290,17 @@ exports.getScheduleWithParams = async (req, res) => {
               delete ret[fac][sem][y]
             }
           }
+          if(Object.keys(ret[fac][sem]).length === 0)
+            delete ret[fac][sem]
         }
+        if(Object.keys(ret[fac]).length === 0)
+          delete ret[fac]
       }
+      if(Object.keys(ret).length === 0)
+        return res.status(HttpStatus.OK).json({
+          success: true, 
+          schedule: null
+        })
     }
 
     // filters the day
@@ -317,9 +326,20 @@ exports.getScheduleWithParams = async (req, res) => {
                   delete ret[fac][sem][y][d]
                 }
               }
+              if(Object.keys(ret[fac][sem][y]).length === 0)
+                delete ret[fac][sem][y]
             }
+            if(Object.keys(ret[fac][sem]).length === 0)
+              delete ret[fac][sem]
           }
+          if(Object.keys(ret[fac]).length === 0)
+            delete ret[fac]
         }
+        if(Object.keys(ret).length === 0)
+          return res.status(HttpStatus.OK).json({
+            success: true, 
+            schedule: null
+          })
       }
     }
 
@@ -347,10 +367,23 @@ exports.getScheduleWithParams = async (req, res) => {
                 }
                 return false
               })
+              if(ret[fac][sem][year][day].length === 0)
+                delete ret[fac][sem][year][day]
             }
+            if(Object.keys(ret[fac][sem][year]).length === 0)
+              delete ret[fac][sem][year]
           }
+          if(Object.keys(ret[fac][sem]).length === 0)
+            delete ret[fac][sem]
         }
+        if(Object.keys(ret[fac]).length === 0)
+          delete ret[fac]
       }
+      if(Object.keys(ret).length === 0)
+        return res.send(HttpStatus.OK).json({
+          success: true,
+          schedule:null
+        })
     }
     
 
@@ -379,12 +412,24 @@ exports.getScheduleWithParams = async (req, res) => {
                 }
                 return false
               })
+              if(ret[fac][sem][year][day].length === 0)
+                delete ret[fac][sem][year][day]
             }
+            if(Object.keys(ret[fac][sem][year]).length === 0)
+              delete ret[fac][sem][year]
           }
+          if(Object.keys(ret[fac][sem]).length === 0)
+            delete ret[fac][sem]
         }
-      }
-
+        if(Object.keys(ret[fac]).length === 0)
+        delete ret[fac]
     }
+    if(Object.keys(ret).length === 0)
+      return res.send(HttpStatus.OK).json({
+        success: true,
+        schedule:null
+      })
+  }
 
     // filters the room
     if(room){
@@ -401,12 +446,24 @@ exports.getScheduleWithParams = async (req, res) => {
                 }
                 return false
               })
-            }
+              if(ret[fac][sem][year][day].length === 0)
+              delete ret[fac][sem][year][day]
           }
+          if(Object.keys(ret[fac][sem][year]).length === 0)
+            delete ret[fac][sem][year]
         }
+        if(Object.keys(ret[fac][sem]).length === 0)
+          delete ret[fac][sem]
       }
-
-    }
+      if(Object.keys(ret[fac]).length === 0)
+      delete ret[fac]
+  }
+  if(Object.keys(ret).length === 0)
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      schedule:null
+    })
+}
 
     // removes day key from ret if parameter is set and doesn't contain a comma
     if (dayNum && dayNum.split(',').length === 1) {
@@ -422,21 +479,28 @@ exports.getScheduleWithParams = async (req, res) => {
     // removes year key from ret if parameter is set and doesn't contain a comma
     if (year && year.split(',').length === 1) {
       for (const fac in ret) {
-        for (const sem in ret[fac]) { ret[fac][sem] = ret[fac][sem][year] }
+        for (const sem in ret[fac]) {
+          ret[fac][sem] = ret[fac][sem][year]
+        }
       }
     }
 
     // removes sem1/2 key from ret if parameter is set
     if (semester) {
       if (semester === '1') {
-        for (const fac in ret) { ret[fac] = ret[fac].sem1 }
+        for (const fac in ret) {
+          ret[fac] = ret[fac].sem1
+        }
       } else {
-        for (const fac in ret) { ret[fac] = ret[fac].sem2 }
+        for (const fac in ret) {
+          ret[fac] = ret[fac].sem2
+        }
       }
     }
 
     // removes faculty key from ret if parameter is set and doesn't contain a comma
-    if (faculty && faculty.split(',').length === 1) { ret = ret[faculty] }
+    if (faculty && faculty.split(',').length === 1)
+      ret = ret[faculty]
 
     return res.status(HttpStatus.OK).json({
       success: true,
