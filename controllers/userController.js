@@ -103,6 +103,34 @@ exports.changePassword = async (req, res) => {
   }
 }
 
+exports.deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params
+
+    const result = await req.db.User.deleteOne({
+      _id: ObjectId(userId)
+    })
+
+    if (result) {
+      return res.json({
+        success: true,
+        message: 'User deleted successfully'
+      })
+    }
+
+    return res.json({
+      success: false,
+      message: 'User not found'
+    })
+  } catch (error) {
+    req.log.error(`Unable to delete user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
+
 exports.createUser = async (req, res) => {
   try {
     const existingUser = await req.db.User.findOne({ email: req.body.email })
