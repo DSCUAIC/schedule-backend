@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const {
   mongo: { ObjectId }
 } = require('mongoose')
-
+const cloudinary = require('cloudinary')
 const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
