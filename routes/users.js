@@ -1,9 +1,13 @@
 const router = require('express').Router()
 const { userController } = require('../controllers')
 
-const { payloadValidation } = require('../middlewares')
-const { requireAdmin } = require('../middlewares/index')
-const { updateUser, changePassword } = require('../schemas').users
+const { payloadValidation, requireAdmin } = require('../middlewares')
+const {
+  updateUser,
+  changePassword,
+  register,
+  resetPassword
+} = require('../schemas').users
 
 router.get('/', userController.getUsers)
 router.patch('/', payloadValidation(updateUser), userController.updateUser)
@@ -13,5 +17,16 @@ router.patch(
   userController.changePassword
 )
 router.delete('/:userId', requireAdmin, userController.deleteUser)
+router.post(
+  '/',
+  requireAdmin,
+  payloadValidation(register),
+  userController.createUser
+)
+router.post(
+  '/reset_password',
+  payloadValidation(resetPassword),
+  userController.resetPassword
+)
 
 module.exports = router

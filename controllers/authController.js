@@ -3,6 +3,8 @@ const { createTkn, constants, decodeTkn } = require('../utils')
 const sendEmail = require('../utils/sendMail')
 const bcrypt = require('bcrypt')
 
+const { resetClaim } = constants
+
 exports.login = async (req, res) => {
   try {
     const user = await req.db.User.findOne({ email: req.body.email })
@@ -65,7 +67,7 @@ exports.register = async (req, res) => {
       { ...user._doc, aud: req.config.TKN_AUD, iss: req.config.TKN_ISS },
       req.config.JWT_KEY
     )
-    const link = 'http://localhost:4200/verification?token=' + token
+    const link = 'http://localhost:4200/auth/verification?token=' + token
     sendEmail({
       config: req.config,
       to: req.body.email,
@@ -104,6 +106,47 @@ exports.validate = async (req, res) => {
     })
   } catch (error) {
     req.log.error(`Unable to validate user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    const user = await req.db.User.findOne({ email })
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+
+    const token = createTkn(
+      {
+        _id: user._id,
+        [resetClaim]: true
+      },
+      req.config.JWT_KEY
+    )
+
+    const link = 'http://localhost:4200/auth/resetPassword?token=' + token
+
+    sendEmail({
+      config: req.config,
+      to: email,
+      template: 'forgotPassword',
+      vars: { firstname: user.firstname, lastname: user.lastname, link }
+    })
+
+    return res.json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to reset password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false
     })

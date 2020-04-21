@@ -4,7 +4,7 @@ const {
   mongo: { ObjectId }
 } = require('mongoose')
 
-const { saltRounds } = require('../utils').constants
+const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -126,7 +126,60 @@ exports.deleteUser = async (req, res) => {
     req.log.error(`Unable to delete user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: error.message
+      message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.createUser = async (req, res) => {
+  try {
+    const existingUser = await req.db.User.findOne({ email: req.body.email })
+
+    if (existingUser) {
+      return res.status(HttpStatus.CONFLICT).json({
+        success: false,
+        message: 'User already exists!'
+      })
+    }
+
+    req.db.User.create(req.body)
+
+    return res.json({
+      success: true,
+      message: 'User created'
+    })
+  } catch (error) {
+    req.log.error(`Unable to create user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    if (!req.user[resetClaim]) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        success: false
+      })
+    }
+
+    const { password } = req.body
+
+    const newPassword = bcrypt.hashSync(password, saltRounds)
+
+    await req.db.User.updateOne(
+      { _id: ObjectId(req.user[idClaim]) },
+      { password: newPassword }
+    )
+
+    return res.json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to reset password -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
     })
   }
 }

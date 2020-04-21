@@ -4,6 +4,7 @@ const Schedule = require('./schedule')
 const Year = require('./year')
 const Day = require('./day')
 const Course = require('./course')
+const Secret = require('./secret')
 
 const db = {
   User,
@@ -11,7 +12,8 @@ const db = {
   Schedule,
   Year,
   Day,
-  Course
+  Course,
+  Secret
 }
 
 module.exports = db
