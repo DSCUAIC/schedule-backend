@@ -11,10 +11,6 @@ router.patch(
   payloadValidation(changePassword),
   userController.changePassword
 )
-router.patch(
-  '/change_profile_image',
-  upload.single('profileImage'),
-  userController.changeProfileImage
-)
+
 router.post('/', requireAdmin, payloadValidation(register), userController.createUser)
 module.exports = router

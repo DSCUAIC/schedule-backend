@@ -125,29 +125,4 @@ exports.createUser = async (req, res) => {
     })
   }
 }
-exports.changeProfileImage = async (req, res) => {
-  try {
-    const { path } = req.file
-    const { email } = req.user
 
-    const user = await req.db.User.findOne({ email })
-    if (user.profileImage.id) { await cloudinary.v2.uploader.destroy(user.profileImage.id) }
-    const result = await cloudinary.v2.uploader.upload(path)
-    const profileImage = {
-      id: result.public_id,
-      path: result.secure_url
-    }
-
-    await req.db.User.updateOne({ email }, { profileImage })
-
-    return res.json({
-      success: true
-    })
-  } catch (error) {
-    req.log.error(`Unable to change profile image-> ${error}`)
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message
-    })
-  }
-}
