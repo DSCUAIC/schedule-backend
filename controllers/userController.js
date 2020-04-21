@@ -1,8 +1,10 @@
 const HttpStatus = require('http-status-codes')
 const bcrypt = require('bcrypt')
+const {
+  mongo: { ObjectId }
+} = require('mongoose')
 
-const { saltRounds } = require('../utils').constants
-const cloudinary = require('cloudinary')
+const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -126,3 +128,57 @@ exports.createUser = async (req, res) => {
   }
 }
 
+exports.resetPassword = async (req, res) => {
+  try {
+    if (!req.user[resetClaim]) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        success: false
+      })
+    }
+
+    const { password } = req.body
+
+    const newPassword = bcrypt.hashSync(password, saltRounds)
+
+    await req.db.User.updateOne(
+      { _id: ObjectId(req.user[idClaim]) },
+      { password: newPassword }
+    )
+
+    return res.json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to reset password -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false
+    })
+  }
+}
+
+exports.changeProfileImage = async (req, res) => {
+  try {
+    const { path } = req.file
+    const { email } = req.user
+
+    const user = await req.db.User.findOne({ email })
+    if (user.profileImage.id) { await cloudinary.v2.uploader.destroy(user.profileImage.id) }
+    const result = await cloudinary.v2.uploader.upload(path)
+    const profileImage = {
+      id: result.public_id,
+      path: result.secure_url
+    }
+
+    await req.db.User.updateOne({ email }, { profileImage })
+
+    return res.json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to change profile image-> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
