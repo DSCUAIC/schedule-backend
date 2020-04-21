@@ -91,7 +91,7 @@ exports.changePassword = async (req, res) => {
 
     await req.db.User.updateOne({ email }, { password })
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true
     })
   } catch (error) {
@@ -112,13 +112,13 @@ exports.deleteUser = async (req, res) => {
     })
 
     if (result) {
-      return res.json({
+      return res.status(HttpStatus.OK).json({
         success: true,
         message: 'User deleted successfully'
       })
     }
 
-    return res.json({
+    return res.status(HttpStatus.NOT_FOUND).json({
       success: false,
       message: 'User not found'
     })
@@ -144,7 +144,7 @@ exports.createUser = async (req, res) => {
 
     req.db.User.create(req.body)
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: 'User created'
     })
@@ -173,7 +173,7 @@ exports.resetPassword = async (req, res) => {
       { password: newPassword }
     )
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true
     })
   } catch (error) {
