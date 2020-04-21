@@ -297,7 +297,7 @@ exports.getScheduleWithParams = async (req, res) => {
     // filters the day
     if (dayNum) {
       const days = dayNum.split(',')
-      let daysText = []
+      const daysText = []
       for (let index = 0; index < days.length; index++) {
         if (daysRo[days[index]] === undefined) {
           days.splice(index, 1)
