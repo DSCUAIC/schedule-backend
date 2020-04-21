@@ -414,7 +414,7 @@ exports.getScheduleWithParams = async (req, res) => {
 
     // removes sem1/2 key from ret if parameter is set
     if (semester) {
-      if (semester === 1) {
+      if (semester === '1') {
         for (const fac in ret) {
           const aux = ret[fac].sem1
           delete ret[fac].sem1
