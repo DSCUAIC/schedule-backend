@@ -29,9 +29,7 @@ const server = async () => {
   config = {
     PORT: process.env.PORT || config.PORT,
     DB_URI: process.env.DB_URI || config.DB_URI,
-    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY,
-    CLOUDINARY_API_KEY: config.CLOUDINARY_API_KEY,
-    CLOUDINARY_API_SECRET: config.CLOUDINARY_API_SECRET
+    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY
   }
 
   const cryptr = new Cryptr(config.SECRET_KEY)
