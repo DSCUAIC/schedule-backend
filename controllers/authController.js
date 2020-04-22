@@ -75,7 +75,7 @@ exports.register = async (req, res) => {
       vars: { firstName: req.body.firstname, lastName: req.body.lastname, link }
     })
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       token
     })
@@ -100,7 +100,7 @@ exports.validate = async (req, res) => {
       })
     }
     await req.db.User.updateOne(newUser, { verified: true })
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       token
     })
@@ -142,7 +142,7 @@ exports.forgotPassword = async (req, res) => {
       vars: { firstname: user.firstname, lastname: user.lastname, link }
     })
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true
     })
   } catch (error) {

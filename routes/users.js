@@ -16,6 +16,7 @@ router.patch(
   payloadValidation(changePassword),
   userController.changePassword
 )
+router.delete('/:userId', requireAdmin, userController.deleteUser)
 router.post(
   '/',
   requireAdmin,

@@ -29,7 +29,9 @@ const server = async () => {
   config = {
     PORT: process.env.PORT || config.PORT,
     DB_URI: process.env.DB_URI || config.DB_URI,
-    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY
+    SECRET_KEY: process.env.SECRET_KEY || config.SECRET_KEY,
+    CLOUDINARY_API_KEY: config.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET: config.CLOUDINARY_API_SECRET
   }
 
   const cryptr = new Cryptr(config.SECRET_KEY)
@@ -61,8 +63,8 @@ const server = async () => {
 
   cloudinary.config({
     cloud_name: 'scheduleapp',
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_key: config.CLOUDINARY_API_KEY,
+    api_secret: config.CLOUDINARY_API_SECRET
   })
 
   if (process.env.NODE_ENV === 'dev' || config.NODE_ENV === 'dev') {
