@@ -29,14 +29,14 @@ exports.setDatabase = db => {
 }
 
 exports.requireAdmin = (req, res, next) => {
-  if (req.user.admin) {
-    next()
+  if (!req.user.admin) {
+    return res.status(HttpStatus.FORBIDDEN).json({
+      success: false,
+      message: 'You must be an admin to access'
+    })
   }
 
-  return res.status(HttpStatus.FORBIDDEN).json({
-    success: false,
-    message: 'You must be an admin to access'
-  })
+  next()
 }
 
 exports.requireAuth = () => {

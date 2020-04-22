@@ -91,7 +91,7 @@ exports.changePassword = async (req, res) => {
 
     await req.db.User.updateOne({ email }, { password })
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true
     })
   } catch (error) {
@@ -99,6 +99,34 @@ exports.changePassword = async (req, res) => {
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message
+    })
+  }
+}
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params
+
+    const result = await req.db.User.deleteOne({
+      _id: ObjectId(userId)
+    })
+
+    if (result) {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        message: 'User deleted successfully'
+      })
+    }
+
+    return res.status(HttpStatus.NOT_FOUND).json({
+      success: false,
+      message: 'User not found'
+    })
+  } catch (error) {
+    req.log.error(`Unable to delete user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -116,7 +144,7 @@ exports.createUser = async (req, res) => {
 
     req.db.User.create(req.body)
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: 'User created'
     })
@@ -145,7 +173,7 @@ exports.resetPassword = async (req, res) => {
       { password: newPassword }
     )
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true
     })
   } catch (error) {
