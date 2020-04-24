@@ -29,4 +29,7 @@ router.post(
   userController.resetPassword
 )
 
+router.get('/favorites', userController.getFavorites)
+router.patch('/favorites', userController.getFavorites)
+
 module.exports = router

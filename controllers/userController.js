@@ -190,3 +190,78 @@ exports.resetPassword = async (req, res) => {
     })
   }
 }
+
+exports.getFavorites = async (req, res) =>{
+  try{
+    
+    if(req.user)
+    {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        favorites: req.user.favoriteCourses
+      })
+    }
+    else
+    {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Something bad happened!'
+      })
+    }
+  }
+  catch(e)
+  {
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.updateFavorites = async (req, res) =>{
+  try{
+    const newFavoriteCourses=[]
+    
+    if(req.user)
+    {
+      for(let course in req.body.coursesToAdd)
+      {
+        newFavoriteCourses.push(course)
+      }
+      for(let course in req.user.favoriteCourses)
+      {
+        newFavoriteCourses.push(course)
+      }
+      newFavoriteCourses=[new Set(newFavoriteCourses)]
+
+      for(let course in req.body.coursesToRemove)
+      {
+        newFavoriteCourses.filter((item,index) => item!=course)
+      }
+
+      await req.db.User.updateOne(
+        { _id: ObjectId(req.user[idClaim]) },
+        { password: newFavoriteCourses }
+      )
+      
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        message: 'Favorite courses updated successfully'
+      })
+    }
+    else
+    {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Something bad happened!'
+      })
+    }
+  }
+  catch(e)
+  {
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
