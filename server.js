@@ -41,7 +41,7 @@ const server = async () => {
   })
 
   const secrets = await db.Secret.find({ env: process.env.NODE_ENV || 'dev' })
-  for (var secret of secrets) {
+  for (const secret of secrets) {
     config[secret.key] = cryptr.decrypt(secret.value)
   }
 

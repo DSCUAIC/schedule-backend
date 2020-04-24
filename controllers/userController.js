@@ -1,9 +1,8 @@
 const HttpStatus = require('http-status-codes')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const { idClaim } = require('../utils/constants')
 
-const { saltRounds } = require('../utils').constants
+const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -16,7 +15,8 @@ exports.getAllUsers = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to get users -> ${req.url} -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -38,7 +38,8 @@ exports.getUsers = async (req, res) => {
     } catch (error) {
       req.log.error(`Unable to get current user -> ${req.url} -> ${error}`)
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false
+        success: false,
+        message: 'Something bad happened!'
       })
     }
   }
@@ -57,7 +58,8 @@ exports.getUsers = async (req, res) => {
       `Unable to get users based on queries -> ${req.url} -> ${error}`
     )
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -84,7 +86,6 @@ exports.updateUser = async (req, res) => {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: error.message
     })
   }
 }
@@ -107,14 +108,98 @@ exports.changePassword = async (req, res) => {
 
     await req.db.User.updateOne({ email }, { password })
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true
     })
   } catch (error) {
     req.log.error(`Unable to change password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: error.message
+      message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params
+
+    const result = await req.db.User.deleteOne({
+      _id: ObjectId(userId)
+    })
+
+    if (result) {
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        message: 'User deleted successfully'
+      })
+    }
+
+    return res.status(HttpStatus.NOT_FOUND).json({
+      success: false,
+      message: 'User not found'
+    })
+  } catch (error) {
+    req.log.error(`Unable to delete user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.createUser = async (req, res) => {
+  try {
+    const existingUser = await req.db.User.findOne({ email: req.body.email })
+
+    if (existingUser) {
+      return res.status(HttpStatus.CONFLICT).json({
+        success: false,
+        message: 'User already exists!'
+      })
+    }
+
+    req.db.User.create(req.body)
+
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      message: 'User created'
+    })
+  } catch (error) {
+    req.log.error(`Unable to create user -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    if (!req.user[resetClaim]) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        success: false,
+        message: 'You must have a resetClaim in your request.'
+      })
+    }
+
+    const { password } = req.body
+
+    const newPassword = bcrypt.hashSync(password, saltRounds)
+
+    await req.db.User.updateOne(
+      { _id: ObjectId(req.user[idClaim]) },
+      { password: newPassword }
+    )
+
+    return res.status(HttpStatus.OK).json({
+      success: true
+    })
+  } catch (error) {
+    req.log.error(`Unable to reset password -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }

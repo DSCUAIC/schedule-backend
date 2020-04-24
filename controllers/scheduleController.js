@@ -90,7 +90,7 @@ exports.getRoomSchedule = async (req, res) => {
     req.log.error(`Unable to getroom schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Something didn't go well.."
+      message: 'Something bad happened!'
     })
   }
 }
@@ -187,7 +187,7 @@ exports.getGroupSchedule = async (req, res) => {
       schedule[yearNumber]
     )) {
       const weekDayClasses = weekDaySchedule.filter(weekDayClass =>
-        weekDayClass.Grupa.endsWith(groupName)
+        (weekDayClass.Tip === 'Curs' && weekDayClass.Grupa.indexOf(groupName.substring(0, groupName.length - 1)) !== -1) || weekDayClass.Grupa.indexOf(groupName) !== -1
       )
       classes[weekDay] = weekDayClasses
 
@@ -251,7 +251,7 @@ exports.getScheduleWithParams = async (req, res) => {
     if (faculty && faculty !== 'FII') {
       return res.status(HttpStatus.OK).json({
         success: true,
-        schedule: {}
+        schedule: null
       })
     }
 
@@ -290,17 +290,22 @@ exports.getScheduleWithParams = async (req, res) => {
               delete ret[fac][sem][y]
             }
           }
+          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
         }
+        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
+      }
+      if (Object.keys(ret).length === 0) {
+        return res.status(HttpStatus.OK).json({
+          success: true,
+          schedule: null
+        })
       }
     }
 
     // filters the day
     if (dayNum) {
       const days = dayNum.split(',')
-      let daysText = []
-      daysText = undefined
-      daysText = []
-      daysText.splice(0, 1)
+      const daysText = []
       for (let index = 0; index < days.length; index++) {
         if (daysRo[days[index]] === undefined) {
           days.splice(index, 1)
@@ -320,71 +325,127 @@ exports.getScheduleWithParams = async (req, res) => {
                   delete ret[fac][sem][y][d]
                 }
               }
+              if (Object.keys(ret[fac][sem][y]).length === 0) { delete ret[fac][sem][y] }
             }
+            if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
           }
+          if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
+        }
+        if (Object.keys(ret).length === 0) {
+          return res.status(HttpStatus.OK).json({
+            success: true,
+            schedule: null
+          })
         }
       }
     }
 
-    // filters the group, semiyear and room
-    if (group || semiyear || room) {
-      let groups = []
-      let semiyears = []
-      let rooms = []
-      if (group) groups = group.split(',')
-      if (semiyear) semiyears = semiyear.split(',')
-      if (room) rooms = room.split(',')
+    // filters the semiyear
+    if (semiyear) {
+      const semiyears = semiyear.split(',')
+
+      // first healthy check
+      for (const i in semiyears) {
+        if (semiyears[i] !== 'A' && semiyears[i] !== 'B' && semiyears[i] !== 'E') {
+          return res.status(HttpStatus.BAD_REQUEST).json({
+            success: false,
+            message: 'Bad semiyear provided. Only A, B and E are accepted, with a comma to separate them if the case.'
+          })
+        }
+      }
+      for (const fac in ret) {
+        for (const sem in ret[fac]) {
+          for (const year in ret[fac][sem]) {
+            for (const day in ret[fac][sem][year]) {
+              ret[fac][sem][year][day] = ret[fac][sem][year][day].filter(course => {
+                for (const y in semiyears) {
+                  if (course.Grupa.indexOf(semiyears[y]) !== -1) { return true }
+                }
+                return false
+              })
+              if (ret[fac][sem][year][day].length === 0) { delete ret[fac][sem][year][day] }
+            }
+            if (Object.keys(ret[fac][sem][year]).length === 0) { delete ret[fac][sem][year] }
+          }
+          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
+        }
+        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
+      }
+      if (Object.keys(ret).length === 0) {
+        return res.send(HttpStatus.OK).json({
+          success: true,
+          schedule: null
+        })
+      }
+    }
+
+    // filters the group
+    if (group) {
+      const groups = group.split(',')
+
+      // check if valid group
+      for (const i in groups) {
+        if (isNaN(groups[i])) {
+          return res.status(HttpStatus.BAD_REQUEST).json({
+            success: false,
+            message: 'Bad group number provided. Only numbers are allowed.'
+          })
+        }
+      }
 
       for (const fac in ret) {
         for (const sem in ret[fac]) {
-          for (const y in ret[fac][sem]) {
-            for (const d in ret[fac][sem][y]) {
-              ret[fac][sem][y][d] = ret[fac][sem][y][d].filter(classObj => {
-                var r = false
-
-                // filters the group
-                if (group) {
-                  groups.forEach(groupParam => {
-                    classObj.Grupa.split(' , ').forEach(classGroup => {
-                      if (classGroup.length === 2 || classGroup.length === 3 || classGroup.endsWith(groupParam)) r = true
-                    })
-                  })
+          for (const year in ret[fac][sem]) {
+            for (const day in ret[fac][sem][year]) {
+              ret[fac][sem][year][day] = ret[fac][sem][year][day].filter(course => {
+                for (const y in groups) {
+                  if (course.Grupa.indexOf('A' + groups[y]) !== -1 || course.Grupa.indexOf('B' + groups[y]) !== -1 || course.Grupa.indexOf('E' + groups[y]) !== -1 || course.Tip === 'Curs') { return true }
                 }
-                if (r === false) return false
-
-                // filters the semiyear
-                if (semiyear) {
-                  r = false
-                  semiyears.forEach(semiyearParam => {
-                    classObj.Grupa.split(' , ').forEach(classGroup => {
-                      if (classGroup.length === 2 || classGroup[2] === semiyearParam) r = true
-                    })
-                  })
-                }
-                if (r === false) return false
-
-                // filters the room
-                if (room) {
-                  r = false
-                  rooms.forEach(roomParam => {
-                    if (classObj.Sala === roomParam) r = true
-                  })
-                }
-                return r
+                return false
               })
-
-              // removes day from ret if is empty
-              if (ret[fac][sem][y][d].length === 0) {
-                delete ret[fac][sem][y][d]
-              }
+              if (ret[fac][sem][year][day].length === 0) { delete ret[fac][sem][year][day] }
             }
-
-            // removes year from ret if is empty
-            if (Object.keys(ret[fac][sem][y]).length === 0) {
-              delete ret[fac][sem][y]
-            }
+            if (Object.keys(ret[fac][sem][year]).length === 0) { delete ret[fac][sem][year] }
           }
+          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
         }
+        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
+      }
+      if (Object.keys(ret).length === 0) {
+        return res.send(HttpStatus.OK).json({
+          success: true,
+          schedule: null
+        })
+      }
+    }
+
+    // filters the room
+    if (room) {
+      const rooms = room.split(',')
+
+      for (const fac in ret) {
+        for (const sem in ret[fac]) {
+          for (const year in ret[fac][sem]) {
+            for (const day in ret[fac][sem][year]) {
+              ret[fac][sem][year][day] = ret[fac][sem][year][day].filter(course => {
+                for (const y in rooms) {
+                  if (course.Sala.indexOf(rooms[y]) !== -1) { return true }
+                }
+                return false
+              })
+              if (ret[fac][sem][year][day].length === 0) { delete ret[fac][sem][year][day] }
+            }
+            if (Object.keys(ret[fac][sem][year]).length === 0) { delete ret[fac][sem][year] }
+          }
+          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
+        }
+        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
+      }
+      if (Object.keys(ret).length === 0) {
+        return res.status(HttpStatus.OK).json({
+          success: true,
+          schedule: null
+        })
       }
     }
 
@@ -393,9 +454,7 @@ exports.getScheduleWithParams = async (req, res) => {
       for (const fac in ret) {
         for (const sem in ret[fac]) {
           for (const y in ret[fac][sem]) {
-            const aux = ret[fac][sem][y][daysRo[dayNum]]
-            delete ret[fac][sem][y][daysRo[dayNum]]
-            ret[fac][sem][y] = aux
+            ret[fac][sem][y] = ret[fac][sem][y][daysRo[dayNum]]
           }
         }
       }
@@ -405,36 +464,26 @@ exports.getScheduleWithParams = async (req, res) => {
     if (year && year.split(',').length === 1) {
       for (const fac in ret) {
         for (const sem in ret[fac]) {
-          const aux = ret[fac][sem][year]
-          delete ret[fac][sem][year]
-          ret[fac][sem] = aux
+          ret[fac][sem] = ret[fac][sem][year]
         }
       }
     }
 
     // removes sem1/2 key from ret if parameter is set
     if (semester) {
-      if (semester === 1) {
+      if (semester === '1') {
         for (const fac in ret) {
-          const aux = ret[fac].sem1
-          delete ret[fac].sem1
-          ret[fac] = aux
+          ret[fac] = ret[fac].sem1
         }
       } else {
         for (const fac in ret) {
-          const aux = ret[fac].sem2
-          delete ret[fac].sem2
-          ret[fac] = aux
+          ret[fac] = ret[fac].sem2
         }
       }
     }
 
     // removes faculty key from ret if parameter is set and doesn't contain a comma
-    if (faculty && faculty.split(',').length === 1) {
-      const aux = ret[faculty]
-      delete ret[faculty]
-      ret = aux
-    }
+    if (faculty && faculty.split(',').length === 1) { ret = ret[faculty] }
 
     return res.status(HttpStatus.OK).json({
       success: true,
@@ -444,7 +493,7 @@ exports.getScheduleWithParams = async (req, res) => {
     req.log.error(`Unable to get parameterized schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Something bad happened!'
     })
   }
 }
