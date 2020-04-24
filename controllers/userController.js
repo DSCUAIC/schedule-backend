@@ -1,6 +1,7 @@
 const HttpStatus = require('http-status-codes')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const {idClaim} = require('../utils/constants')
 
 const { saltRounds } = require('../utils').constants
 
@@ -63,7 +64,7 @@ exports.getUsers = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const idToSearchFor = mongoose.Types.ObjectId(req.user['user:id'])
+    const idToSearchFor = mongoose.Types.ObjectId(req.user[idClaim])
     const user = await req.db.User.findOne(idToSearchFor)
 
     if (!user) {
@@ -76,12 +77,14 @@ exports.updateUser = async (req, res) => {
     await req.db.User.updateOne(user, req.body)
 
     return res.json({
-      success: true
+      success: true,
+      message: 'User updated successfully.'
     })
   } catch (error) {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false, 
+      message: error.message
     })
   }
 }
