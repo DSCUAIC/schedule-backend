@@ -47,6 +47,11 @@ const userSchema = new Schema(
     admin: {
       type: Boolean,
       default: false
+    },
+    favoriteCourses:
+    {
+      type: Array,
+      default: []
     }
   },
   { timestamps: true }
