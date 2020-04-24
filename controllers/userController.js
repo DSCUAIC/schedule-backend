@@ -1,6 +1,9 @@
 const HttpStatus = require('http-status-codes')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const {
+  mongo: { ObjectId }
+} = require('mongoose')
 
 const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
@@ -85,7 +88,7 @@ exports.updateUser = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
+      success: false
     })
   }
 }
