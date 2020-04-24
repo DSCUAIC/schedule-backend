@@ -42,7 +42,8 @@ exports.login = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to get user -> ${req.url} -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -82,7 +83,8 @@ exports.register = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to create user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -107,7 +109,8 @@ exports.validate = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to validate user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -148,7 +151,8 @@ exports.forgotPassword = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to reset password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
