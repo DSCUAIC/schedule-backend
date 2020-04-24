@@ -18,7 +18,6 @@ describe('GET /', () => {
   test('should succeed if server is up', async () => {
     try {
       const response = await server.get('/')
-
       expect(response.status).toEqual(HttpStatus.OK)
       expect(response.body).toHaveProperty('status')
       expect(response.body.status).toEqual('active')

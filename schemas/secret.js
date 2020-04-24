@@ -9,11 +9,4 @@ const secretAddUpdate = Joi.object({
     .required()
 })
 
-const secretDelete = Joi.object({
-  key: Joi.string()
-    .required(),
-  env: Joi.string()
-    .required()
-})
-
-module.exports = { secretAddUpdate, secretDelete }
+module.exports = { secretAddUpdate }

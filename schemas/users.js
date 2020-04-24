@@ -1,12 +1,8 @@
 const Joi = require('@hapi/joi')
 
 const changePassword = Joi.object({
-  oldPass: Joi.string()
-    .min(6)
-    .required(),
-  newPass: Joi.string()
-    .min(6)
-    .required()
+  oldPass: Joi.string().min(6).required(),
+  newPass: Joi.string().min(6).required()
 })
 
 const updateUser = Joi.object({
@@ -19,4 +15,8 @@ const updateUser = Joi.object({
   faculty: Joi.string().optional()
 })
 
-module.exports = { changePassword, updateUser }
+const resetPassword = Joi.object({
+  password: Joi.string().min(6).required()
+})
+
+module.exports = { changePassword, updateUser, resetPassword }

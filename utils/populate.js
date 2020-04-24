@@ -29,12 +29,15 @@ const populate = async db => {
 
       const days = []
 
-      for (const day of Object.values(s1[year])) {
+      for (const name in s1[year]) {
+        const day = s1[year][name]
+
         const currentDay = await db.Day.create({
           semester: schedule.semester,
           year: currentYear._id,
           faculty: fac._id,
-          schedule: schedule._id
+          schedule: schedule._id,
+          name: name.toLowerCase()
         })
 
         const courses = []
