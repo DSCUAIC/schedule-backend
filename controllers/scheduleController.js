@@ -90,7 +90,7 @@ exports.getRoomSchedule = async (req, res) => {
     req.log.error(`Unable to getroom schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Something didn't go well.."
+      message: 'Something bad happened!'
     })
   }
 }
@@ -493,7 +493,7 @@ exports.getScheduleWithParams = async (req, res) => {
     req.log.error(`Unable to get parameterized schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Something bad happened!'
     })
   }
 }
