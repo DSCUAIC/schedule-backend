@@ -1,6 +1,92 @@
 const HttpStatus = require('http-status-codes')
 const { getSchedule } = require('../utils')
+const { mongo: { ObjectId } } = require('mongoose')
 
+exports.getProfessorSchedule = async (req, res) => {
+  try {
+    const professors = req.query.name
+
+    const sem1 = {}
+    const sem2 = {}
+
+    const schedule1 = await req.db.Schedule.findOne({ semester: 1 })
+    const schedule2 = await req.db.Schedule.findOne({ semester: 2 })
+
+    for(year of schedule1.years) {
+      sem1[year.year] = {}
+
+      for(day of year.days) {
+        sem1[year.year][day.name] = []
+
+        for(course of day.courses) {
+          if (Array.isArray(professors)) {
+            for(prof of professors) {
+              if (course.professor.includes(prof)) {
+                sem1[year.year][day.name].push(course)
+              }
+            }
+          } else {
+            if (course.professor.includes(professors)) {
+              sem1[year.year][day.name].push(course)
+            }
+          }
+        }
+
+        if (sem1[year.year][day.name].length === 0) {
+          delete sem1[year.year][day.name]
+        }
+      }
+
+      if (Object.keys(sem1[year.year]).length === 0) {
+          delete sem1[year.year]
+        }
+    }
+
+    for(year of schedule2.years) {
+      sem2[year.year] = {}
+
+      for(day of year.days) {
+        sem2[year.year][day.name] = []
+
+        for(course of day.courses) {
+          if (Array.isArray(professors)) {
+            for(prof of professors) {
+              if (course.professor.includes(prof)) {
+                sem2[year.year][day.name].push(course)
+              }
+            }
+          } else {
+            if (course.professor.includes(professors)) {
+              sem2[year.year][day.name].push(course)
+            }
+          }
+        }
+
+        if (sem2[year.year][day.name].length === 0) {
+          delete sem2[year.year][day.name]
+        }
+      }
+
+      if (Object.keys(sem2[year.year]).length === 0) {
+          delete sem2[year.year]
+        }
+    }
+
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      schedule: {
+        sem1,
+        sem2
+      }
+    })
+  } catch(error) {
+    req.log.error(`Unable to get professor schedule -> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Something bad happened!"
+    })
+  }
+}
 exports.getRoomSchedule = async (req, res) => {
   try {
     const schedule = await getSchedule('./data/schedule.json')
