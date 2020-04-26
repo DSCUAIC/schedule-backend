@@ -5,6 +5,7 @@ const Year = require('./year')
 const Day = require('./day')
 const Course = require('./course')
 const Secret = require('./secret')
+const Share = require('./shares')
 
 const db = {
   User,
@@ -13,7 +14,8 @@ const db = {
   Year,
   Day,
   Course,
-  Secret
+  Secret,
+  Share
 }
 
 module.exports = db
