@@ -534,6 +534,40 @@ describe("GET /schedule", () => {
                 // final check for courses
                 expect(doWeGetCourses).toEqual(true)
             })
+
+            test('provide wrong room', async () => {
+                const response = await server.get('/schedule?room=-1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).toBe(null)
+            })
+
+            test('provide room C210', async () => {
+                const response = await server.get('/schedule?room=C210&faculty=FII')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).not.toBe(null)
+
+                // deep check
+
+                for(const sem in response.body.schedule)
+                    for(const year in response.body.schedule[sem])
+                        for(const day in response.body.schedule[sem][year])
+                            for(const course in response.body.schedule[sem][year][day])
+                                expect(response.body.schedule[sem][year][day][course]['Sala']).toContain('C210')
+            })
         })
         
     })
