@@ -4,7 +4,7 @@
   "description": "The official package of the schedule backend api",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "NODE_ENV=prod && node index.js",
     "dev": "run-script-os",
     "dev:win32": "set NODE_ENV=dev&&nodemon index.js",
     "dev:darwin:linux": "NODE_ENV=dev nodemon index.js",
