@@ -17,7 +17,8 @@ exports.getAllUsers = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to get users -> ${req.url} -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -39,7 +40,8 @@ exports.getUsers = async (req, res) => {
     } catch (error) {
       req.log.error(`Unable to get current user -> ${req.url} -> ${error}`)
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false
+        success: false,
+        message: 'Something bad happened!'
       })
     }
   }
@@ -58,7 +60,8 @@ exports.getUsers = async (req, res) => {
       `Unable to get users based on queries -> ${req.url} -> ${error}`
     )
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -68,7 +71,8 @@ exports.updateUser = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -98,7 +102,7 @@ exports.changePassword = async (req, res) => {
     req.log.error(`Unable to change password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: error.message
+      message: 'Something bad happened!'
     })
   }
 }
@@ -151,7 +155,8 @@ exports.createUser = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to create user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
@@ -160,7 +165,8 @@ exports.resetPassword = async (req, res) => {
   try {
     if (!req.user[resetClaim]) {
       return res.status(HttpStatus.FORBIDDEN).json({
-        success: false
+        success: false,
+        message: 'You must have a resetClaim in your request.'
       })
     }
 
@@ -179,7 +185,8 @@ exports.resetPassword = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to reset password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }

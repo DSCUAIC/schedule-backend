@@ -31,7 +31,7 @@ exports.addSecret = async (req, res) => {
     req.log.error(`Unable to add secret due to error: ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Something went wrong!'
+      message: 'Something bad happened!'
     })
   }
 }
@@ -62,7 +62,7 @@ exports.updateSecret = async (req, res) => {
     req.log.error(`Unable to add secret due to error: ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Something went wrong!'
+      message: 'Something bad happened!'
     })
   }
 }
