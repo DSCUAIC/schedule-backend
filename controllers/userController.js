@@ -88,7 +88,8 @@ exports.updateUser = async (req, res) => {
   } catch (error) {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false
+      success: false,
+      message: 'Something bad happened!'
     })
   }
 }
