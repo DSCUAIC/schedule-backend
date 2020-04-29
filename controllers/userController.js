@@ -1,4 +1,5 @@
 const HttpStatus = require('http-status-codes')
+const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const {
   mongo: { ObjectId }
@@ -68,6 +69,22 @@ exports.getUsers = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
+    const idToSearchFor = mongoose.Types.ObjectId(req.user[idClaim])
+    const user = await req.db.User.findOne(idToSearchFor)
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'User not found!'
+      })
+    }
+
+    await req.db.User.updateOne(user, req.body)
+
+    return res.json({
+      success: true,
+      message: 'User updated successfully.'
+    })
   } catch (error) {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

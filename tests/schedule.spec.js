@@ -265,7 +265,7 @@ describe("GET /schedule", () => {
                 expect(response.body.schedule.FII).toHaveProperty('sem2')
             })
 
-            test.skip('provide wrong faculty', async () => {
+            test('provide wrong faculty', async () => {
                 const response = await server.get('/schedule?faculty=FI')
                 .set('Authorization', `Bearer ${token}`)
 
@@ -299,7 +299,7 @@ describe("GET /schedule", () => {
                 expect(response.body.message).toEqual('Invalid semester number')
             })
 
-            test.skip('provide semester', async () => {
+            test('provide semester', async () => {
                 const response = await server.get('/schedule?faculty=FII&semester=1')
                 .set('Authorization', `Bearer ${token}`)
 
@@ -317,7 +317,7 @@ describe("GET /schedule", () => {
                 expect(response.body).toHaveProperty('success')
                 expect(response.body.success).toEqual(true)
                 expect(response.body).toHaveProperty('schedule')
-                //expect(response.body.schedule).toEqual()
+                expect(response.body.schedule).toEqual(null)
             })
 
             test('provide year', async () => {
@@ -339,7 +339,235 @@ describe("GET /schedule", () => {
                             expect(response.body.schedule[sem][day][course]['Grupa']).toContain('I1')
             })
 
+            test('provide wrong day', async () => {
+                const response = await server.get('/schedule?faculty=FII&day=9')
+                .set('Authorization', `Bearer ${token}`)
 
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+                
+                
+                expect(response.body.schedule).toHaveProperty('sem1')
+                expect(response.body.schedule.sem1).toHaveProperty('1')
+                expect(response.body.schedule.sem1).toHaveProperty('2')
+                expect(response.body.schedule.sem1).toHaveProperty('3')
+                
+                expect(response.body.schedule.sem1['1']).toHaveProperty('Luni')
+                expect(response.body.schedule.sem1['1']).toHaveProperty('Marti')
+                expect(response.body.schedule.sem1['1']).toHaveProperty('Miercuri')
+                expect(response.body.schedule.sem1['1']).toHaveProperty('Joi')
+                expect(response.body.schedule.sem1['1']).toHaveProperty('Vineri')
+                
+                expect(response.body.schedule.sem1['2']).toHaveProperty('Luni')
+                expect(response.body.schedule.sem1['2']).toHaveProperty('Marti')
+                expect(response.body.schedule.sem1['2']).toHaveProperty('Miercuri')
+                expect(response.body.schedule.sem1['2']).toHaveProperty('Joi')
+                expect(response.body.schedule.sem1['2']).toHaveProperty('Vineri')
+                
+                expect(response.body.schedule.sem1['3']).toHaveProperty('Luni')
+                expect(response.body.schedule.sem1['3']).toHaveProperty('Marti')
+                expect(response.body.schedule.sem1['3']).toHaveProperty('Miercuri')
+                expect(response.body.schedule.sem1['3']).toHaveProperty('Joi')
+                expect(response.body.schedule.sem1['3']).toHaveProperty('Vineri')
+                
+                
+                expect(response.body.schedule).toHaveProperty('sem2')
+                expect(response.body.schedule.sem2).toHaveProperty('1')
+                expect(response.body.schedule.sem2).toHaveProperty('2')
+                expect(response.body.schedule.sem2).toHaveProperty('3')
+                
+                expect(response.body.schedule.sem2['1']).toHaveProperty('Luni')
+                expect(response.body.schedule.sem2['1']).toHaveProperty('Marti')
+                expect(response.body.schedule.sem2['1']).toHaveProperty('Miercuri')
+                expect(response.body.schedule.sem2['1']).toHaveProperty('Joi')
+                expect(response.body.schedule.sem2['1']).toHaveProperty('Vineri')
+                
+                expect(response.body.schedule.sem2['2']).toHaveProperty('Luni')
+                expect(response.body.schedule.sem2['2']).toHaveProperty('Marti')
+                expect(response.body.schedule.sem2['2']).toHaveProperty('Miercuri')
+                expect(response.body.schedule.sem2['2']).toHaveProperty('Joi')
+                expect(response.body.schedule.sem2['2']).toHaveProperty('Vineri')
+
+                expect(response.body.schedule.sem2['3']).toHaveProperty('Luni')
+                expect(response.body.schedule.sem2['3']).toHaveProperty('Marti')
+                expect(response.body.schedule.sem2['3']).toHaveProperty('Miercuri')
+                expect(response.body.schedule.sem2['3']).toHaveProperty('Joi')
+                expect(response.body.schedule.sem2['3']).toHaveProperty('Vineri')
+            })
+
+            test('provide single day', async () => {
+                const response = await server.get('/schedule?faculty=FII&day=1&semester=1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+
+                expect(response.body.schedule).toHaveProperty('1')
+                expect(response.body.schedule).toHaveProperty('2')
+                expect(response.body.schedule).toHaveProperty('3')
+
+                expect(Array.isArray(response.body.schedule['1'])).toBe(true)
+                expect(Array.isArray(response.body.schedule['2'])).toBe(true)
+                expect(Array.isArray(response.body.schedule['3'])).toBe(true)
+            })
+
+            test('provide multiple days', async () => {
+                const response = await server.get('/schedule?faculty=FII&day=1,2&semester=1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                expect(response.body).toHaveProperty('schedule')
+
+                expect(response.body.schedule).toHaveProperty('1')
+                expect(response.body.schedule).toHaveProperty('2')
+                expect(response.body.schedule).toHaveProperty('3')
+
+                expect(response.body.schedule['1']).toHaveProperty('Luni')
+                expect(response.body.schedule['1']).toHaveProperty('Marti')
+                expect(response.body.schedule['2']).toHaveProperty('Luni')
+                expect(response.body.schedule['2']).toHaveProperty('Marti')
+                expect(response.body.schedule['3']).toHaveProperty('Luni')
+                expect(response.body.schedule['3']).toHaveProperty('Marti')
+            })
+
+            test('provide wrong semiyear', async () => {
+                const response = await server.get('/schedule?faculty=FII&semiyear=C')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.BAD_REQUEST)
+
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Bad semiyear provided. Only A, B and E are accepted, with a comma to separate them if the case.')
+            })
+
+            test('provide semiyear', async () => {
+                const response = await server.get('/schedule?faculty=FII&semiyear=E')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).not.toBe(null)
+
+                // deep check
+                for(const sem in response.body.schedule)
+                    for(const year in response.body.schedule[sem])
+                        for(const day in response.body.schedule[sem][year])
+                            for(const course in response.body.schedule[sem][year][day])
+                                expect(response.body.schedule[sem][year][day][course]['Grupa']).toContain('E')
+            })
+
+            test('provide non-numerical group', async () => {
+                const response = await server.get('/schedule?faculty=FII&semiyear=E&group=E')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.BAD_REQUEST)
+
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(false)
+                
+                expect(response.body).toHaveProperty('message')
+                expect(response.body.message).toEqual('Bad group number provided. Only numbers are allowed.')
+            })
+
+            test('provide bad group number', async () => {
+                const response = await server.get('/schedule?faculty=FII&semiyear=E&group=0')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).not.toBe(null)
+
+                // deep check
+                for(const sem in response.body.schedule)
+                    for(const year in response.body.schedule[sem])
+                        for(const day in response.body.schedule[sem][year])
+                            for(const course in response.body.schedule[sem][year][day])
+                                expect(response.body.schedule[sem][year][day][course]['Tip']).toEqual('Curs')
+            })
+
+            test.skip('provide group number', async () => {
+                let doWeGetCourses = false
+                const response = await server.get('/schedule?faculty=FII&semiyear=E&group=3')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+                
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).not.toBe(null)
+
+                // deep check
+
+                for(const sem in response.body.schedule){
+                    for(const year in response.body.schedule[sem]){
+                        for(const day in response.body.schedule[sem][year]){
+                            for(const course in response.body.schedule[sem][year][day]){
+                                if(response.body.schedule[sem][year][day][course]['Tip'] === 'Curs'){
+                                    expect(response.body.schedule[sem][year][day][course]['Grupa']).toContain('E')
+                                    doWeGetCourses = true
+                                }
+                                else
+                                    expect(response.body.schedule[sem][year][day][course]['Grupa']).toContain('E3')
+                            }
+                        }
+                    }
+                }
+
+                // final check for courses
+                expect(doWeGetCourses).toEqual(true)
+            })
+
+            test('provide wrong room', async () => {
+                const response = await server.get('/schedule?room=-1')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).toBe(null)
+            })
+
+            test('provide room C210', async () => {
+                const response = await server.get('/schedule?room=C210&faculty=FII')
+                .set('Authorization', `Bearer ${token}`)
+
+                expect(response.status).toEqual(httpStatus.OK)
+                
+                expect(response.body).toHaveProperty('success')
+                expect(response.body.success).toEqual(true)
+
+                expect(response.body).toHaveProperty('schedule')
+                expect(response.body.schedule).not.toBe(null)
+
+                // deep check
+
+                for(const sem in response.body.schedule)
+                    for(const year in response.body.schedule[sem])
+                        for(const day in response.body.schedule[sem][year])
+                            for(const course in response.body.schedule[sem][year][day])
+                                expect(response.body.schedule[sem][year][day][course]['Sala']).toContain('C210')
+            })
         })
         
     })
