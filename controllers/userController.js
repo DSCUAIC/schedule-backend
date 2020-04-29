@@ -81,7 +81,7 @@ exports.updateUser = async (req, res) => {
 
     await req.db.User.updateOne(user, req.body)
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: 'User updated successfully.'
     })
@@ -113,7 +113,8 @@ exports.changePassword = async (req, res) => {
     await req.db.User.updateOne({ email }, { password })
 
     return res.status(HttpStatus.OK).json({
-      success: true
+      success: true,
+      message: 'Successfully updated password!'
     })
   } catch (error) {
     req.log.error(`Unable to change password -> ${error}`)
@@ -197,7 +198,8 @@ exports.resetPassword = async (req, res) => {
     )
 
     return res.status(HttpStatus.OK).json({
-      success: true
+      success: true,
+      message: 'Successfully reseted password!'
     })
   } catch (error) {
     req.log.error(`Unable to reset password -> ${error}`)
