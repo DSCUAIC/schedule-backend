@@ -225,7 +225,7 @@ exports.changeProfileImage = async (req, res) => {
 
     await req.db.User.updateOne({ email }, { profileImage })
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       success: true,
       message: 'User profile image changed successfully'
     })
