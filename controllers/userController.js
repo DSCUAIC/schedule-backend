@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const {
   mongo: { ObjectId }
 } = require('mongoose')
-
+const cloudinary = require('cloudinary')
 const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
@@ -204,6 +204,34 @@ exports.resetPassword = async (req, res) => {
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.changeProfileImage = async (req, res) => {
+  try {
+    const { path } = req.file
+    const { email } = req.user
+
+    const user = await req.db.User.findOne({ email })
+    if (user.profileImage.id) { await cloudinary.v2.uploader.destroy(user.profileImage.id) }
+    const result = await cloudinary.v2.uploader.upload(path)
+    const profileImage = {
+      id: result.public_id,
+      path: result.secure_url
+    }
+
+    await req.db.User.updateOne({ email }, { profileImage })
+
+    return res.json({
+      success: true,
+      message: 'User profile image changed successfully'
+    })
+  } catch (error) {
+    req.log.error(`Unable to change profile image-> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message
     })
   }
 }

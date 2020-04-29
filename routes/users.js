@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const { userController } = require('../controllers')
 
-const { payloadValidation, requireAdmin } = require('../middlewares')
+const { payloadValidation, requireAdmin, upload } = require('../middlewares')
 const {
   updateUser,
   changePassword,
@@ -28,5 +28,9 @@ router.post(
   payloadValidation(resetPassword),
   userController.resetPassword
 )
-
+router.patch(
+  '/change_profile_image',
+  upload.single('profileImage'),
+  userController.changeProfileImage
+)
 module.exports = router

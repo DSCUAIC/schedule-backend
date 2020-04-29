@@ -2,6 +2,7 @@ const HttpStatus = require('http-status-codes')
 const { decodeTkn, getEvenToken, constants } = require('../utils')
 const { idClaim } = constants
 const payloadValidation = require('./payloadValidation')
+const upload = require('./uploadValidation')
 
 exports.setLogger = logger => {
   return (req, res, next) => {
@@ -77,3 +78,4 @@ exports.requireAuth = () => {
 }
 
 exports.payloadValidation = payloadValidation
+exports.upload = upload
