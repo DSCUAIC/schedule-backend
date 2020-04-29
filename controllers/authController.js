@@ -146,7 +146,8 @@ exports.forgotPassword = async (req, res) => {
     })
 
     return res.status(HttpStatus.OK).json({
-      success: true
+      success: true,
+      message: 'Successfully sent password recovery email!'
     })
   } catch (error) {
     req.log.error(`Unable to reset password -> ${error}`)
