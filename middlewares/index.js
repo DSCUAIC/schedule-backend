@@ -2,6 +2,7 @@ const HttpStatus = require('http-status-codes')
 const { decodeTkn, getEvenToken, constants } = require('../utils')
 const { idClaim } = constants
 const payloadValidation = require('./payloadValidation')
+const upload = require('./uploadValidation')
 
 exports.setLogger = logger => {
   return (req, res, next) => {
@@ -29,14 +30,14 @@ exports.setDatabase = db => {
 }
 
 exports.requireAdmin = (req, res, next) => {
-  if (req.user.admin) {
-    next()
+  if (!req.user.admin) {
+    return res.status(HttpStatus.FORBIDDEN).json({
+      success: false,
+      message: 'You must be an admin to access'
+    })
   }
 
-  return res.status(HttpStatus.FORBIDDEN).json({
-    success: false,
-    message: 'You must be an admin to access'
-  })
+  next()
 }
 
 exports.requireAuth = () => {
@@ -63,17 +64,18 @@ exports.requireAuth = () => {
         req.user = decoded
         return next()
       }
-
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
         message: 'You must have an authorization token'
       })
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false
+        success: false,
+        message: 'Something bad happened!'
       })
     }
   }
 }
 
 exports.payloadValidation = payloadValidation
+exports.upload = upload

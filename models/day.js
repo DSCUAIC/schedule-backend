@@ -2,6 +2,10 @@ const { Schema, model } = require('mongoose')
 
 const daySchema = new Schema(
   {
+    name: {
+      type: String,
+      required: true
+    },
     semester: {
       type: Number,
       required: true
