@@ -91,7 +91,7 @@ exports.register = async (req, res) => {
 
 exports.validate = async (req, res) => {
   try {
-    const token = req.query.token
+    const token = req.body.token
     const { email } = decodeTkn(token, req.config.JWT_KEY)
     const newUser = { email }
     const user = await req.db.User.findOne(newUser)
