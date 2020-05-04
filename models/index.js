@@ -5,7 +5,7 @@ const Year = require('./year')
 const Day = require('./day')
 const Course = require('./course')
 const Secret = require('./secret')
-const Share = require('./shares')
+const Share = require('./share')
 
 const db = {
   User,

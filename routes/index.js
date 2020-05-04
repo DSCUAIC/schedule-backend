@@ -5,6 +5,7 @@ const users = require('./users')
 const auth = require('./auth')
 const schedule = require('./schedule')
 const secrets = require('./secrets')
+const share = require('./share')
 
 const { requireAuth } = require('../middlewares')
 
@@ -15,7 +16,7 @@ router.get('/', (req, res) => {
 })
 
 router.use('/auth', auth)
-
+router.use('/share', share)
 router.use(requireAuth())
 
 router.use('/users', users)
