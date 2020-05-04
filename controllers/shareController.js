@@ -55,9 +55,49 @@ exports.updateFavorites = async (req, res) => {
         message: 'Favorite courses updated successfully'
       })
     } else {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      return res.status(HttpStatus.Unathorized).json({
         success: false,
-        message: 'Something bad happened!'
+        message: 'You need to be loged in!'
+      })
+    }
+  } catch (e) {
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.updateRecivers = async (req, res) => {
+  try {
+    let newRecivers = []
+
+    if (req.user) {
+      for (const reciverId in req.body.reciverToAdd) {
+        newRecivers.push(reciverId)
+      }
+      for (const reciverId in req.share.recivers) {
+        newRecivers.push(reciverId)
+      }
+      newRecivers = [new Set(newRecivers)]
+
+      for (const reciverId in req.body.reciverToRemove) {
+        newRecivers.filter((item, index) => item !== reciverId)
+      }
+      const share = req.db.Share.find({ ownerId: req.user.id })
+      await req.db.Share.updateOne(
+        { _id: share._id },
+        { recivers: newRecivers }
+      )
+
+      return res.status(HttpStatus.OK).json({
+        success: true,
+        message: 'Share recivers updated successfully'
+      })
+    } else {
+      return res.status(HttpStatus.Unathorized).json({
+        success: false,
+        message: 'You need to be loged in!'
       })
     }
   } catch (e) {
