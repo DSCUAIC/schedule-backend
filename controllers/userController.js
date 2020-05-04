@@ -1,9 +1,10 @@
 const HttpStatus = require('http-status-codes')
+const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const {
   mongo: { ObjectId }
 } = require('mongoose')
-
+const cloudinary = require('cloudinary')
 const { saltRounds, idClaim, resetClaim } = require('../utils').constants
 
 exports.getAllUsers = async (req, res) => {
@@ -68,6 +69,22 @@ exports.getUsers = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
+    const idToSearchFor = mongoose.Types.ObjectId(req.user[idClaim])
+    const user = await req.db.User.findOne(idToSearchFor)
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        success: false,
+        message: 'User not found!'
+      })
+    }
+
+    await req.db.User.updateOne(user, req.body)
+
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      message: 'User updated successfully.'
+    })
   } catch (error) {
     req.log.error(`Unable to update user -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -96,7 +113,8 @@ exports.changePassword = async (req, res) => {
     await req.db.User.updateOne({ email }, { password })
 
     return res.status(HttpStatus.OK).json({
-      success: true
+      success: true,
+      message: 'Successfully updated password!'
     })
   } catch (error) {
     req.log.error(`Unable to change password -> ${error}`)
@@ -180,13 +198,42 @@ exports.resetPassword = async (req, res) => {
     )
 
     return res.status(HttpStatus.OK).json({
-      success: true
+      success: true,
+      message: 'Successfully reseted password!'
     })
   } catch (error) {
     req.log.error(`Unable to reset password -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'
+    })
+  }
+}
+
+exports.changeProfileImage = async (req, res) => {
+  try {
+    const { path } = req.file
+    const { email } = req.user
+
+    const user = await req.db.User.findOne({ email })
+    if (user.profileImage.id) { await cloudinary.v2.uploader.destroy(user.profileImage.id) }
+    const result = await cloudinary.v2.uploader.upload(path)
+    const profileImage = {
+      id: result.public_id,
+      path: result.secure_url
+    }
+
+    await req.db.User.updateOne({ email }, { profileImage })
+
+    return res.status(HttpStatus.OK).json({
+      success: true,
+      message: 'User profile image changed successfully'
+    })
+  } catch (error) {
+    req.log.error(`Unable to change profile image-> ${error}`)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message
     })
   }
 }

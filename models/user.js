@@ -52,6 +52,16 @@ const userSchema = new Schema(
     {
       type: Array,
       default: []
+    },
+    profileImage: {
+      id: {
+        type: String,
+        default: null
+      },
+      path: {
+        type: String,
+        default: null
+      }
     }
   },
   { timestamps: true }

@@ -6,7 +6,7 @@ const HttpStatus = require('http-status-codes')
 const dotenv = require('dotenv')
 const helmet = require('helmet')
 const Cryptr = require('cryptr')
-
+const cloudinary = require('cloudinary')
 const mongoose = require('mongoose')
 
 const path = require('path')
@@ -57,6 +57,12 @@ const server = async () => {
     format: format.json(),
     defaultMeta: { env: config.NODE_ENV },
     transports: [new transports.Http(httpTransportOptions)]
+  })
+
+  cloudinary.config({
+    cloud_name: 'scheduleapp',
+    api_key: config.CLOUDINARY_API_KEY,
+    api_secret: config.CLOUDINARY_API_SECRET
   })
 
   if (process.env.NODE_ENV === 'dev' || config.NODE_ENV === 'dev') {
