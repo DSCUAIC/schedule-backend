@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const { scheduleController } = require('../controllers')
 
+router.get('/', scheduleController.getScheduleWithParams)
+
 router.get('/rooms', scheduleController.getRoomSchedule)
 
 router.get('/year/:yearNumber', scheduleController.getYearSchedule)
@@ -16,7 +18,5 @@ router.get(
 )
 
 router.get('/professors', scheduleController.getProfessorSchedule)
-
-router.get('/', scheduleController.getScheduleWithParams)
 
 module.exports = router

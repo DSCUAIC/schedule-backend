@@ -1,5 +1,4 @@
 const HttpStatus = require('http-status-codes')
-const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const {
   mongo: { ObjectId }
@@ -25,14 +24,13 @@ exports.getAllUsers = async (req, res) => {
 }
 
 exports.getUsers = async (req, res) => {
-  // check if the current user is an admin
   const isAdmin = req.user.admin
 
   if (!isAdmin) {
-    // the user is not an admin
-    // get the data of the current user
     try {
-      const user = await req.db.User.findById(req.user['user:id'])
+      const user = await req.db.User.findOne({
+        _id: ObjectId(req.user[idClaim])
+      })
 
       return res.status(HttpStatus.OK).json({
         success: true,
@@ -47,8 +45,6 @@ exports.getUsers = async (req, res) => {
     }
   }
 
-  // the user is an admin
-  // get the data of all users based on query parameters
   try {
     const users = await req.db.User.find(req.query)
 
@@ -69,8 +65,7 @@ exports.getUsers = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const idToSearchFor = mongoose.Types.ObjectId(req.user[idClaim])
-    const user = await req.db.User.findOne(idToSearchFor)
+    const user = await req.db.User.findOne({ _id: ObjectId(req.user[idClaim]) })
 
     if (!user) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -79,7 +74,7 @@ exports.updateUser = async (req, res) => {
       })
     }
 
-    await req.db.User.updateOne(user, req.body)
+    await req.db.User.updateOne({ _id: ObjectId(req.user[idClaim]) }, req.body)
 
     return res.status(HttpStatus.OK).json({
       success: true,
@@ -164,7 +159,7 @@ exports.createUser = async (req, res) => {
       })
     }
 
-    req.db.User.create(req.body)
+    await req.db.User.create(req.body)
 
     return res.status(HttpStatus.OK).json({
       success: true,
@@ -216,7 +211,9 @@ exports.changeProfileImage = async (req, res) => {
     const { email } = req.user
 
     const user = await req.db.User.findOne({ email })
-    if (user.profileImage.id) { await cloudinary.v2.uploader.destroy(user.profileImage.id) }
+    if (user.profileImage.id) {
+      await cloudinary.v2.uploader.destroy(user.profileImage.id)
+    }
     const result = await cloudinary.v2.uploader.upload(path)
     const profileImage = {
       id: result.public_id,
