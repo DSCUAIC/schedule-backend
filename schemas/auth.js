@@ -13,8 +13,12 @@ const register = Joi.object({
   password: Joi.string().min(6).required()
 })
 
+const validate = Joi.object({
+  token: Joi.string().required()
+})
+
 const forgotPassword = Joi.object({
   email: Joi.string().required().email()
 })
 
-module.exports = { login, register, forgotPassword }
+module.exports = { login, register, validate, forgotPassword }
