@@ -1,7 +1,4 @@
-const {
-  Schema,
-  model
-} = require('mongoose')
+const { Schema, model } = require('mongoose')
 
 const facultySchema = new Schema(
   {
@@ -36,7 +33,9 @@ facultySchema.post('find', async docs => {
 })
 
 facultySchema.post('findOne', async doc => {
-  await doc.populate('sem1Schedule').populate('sem2Schedule').execPopulate()
+  if (doc) {
+    await doc.populate('sem1Schedule').populate('sem2Schedule').execPopulate()
+  }
 })
 
 module.exports = model('faculties', facultySchema)
