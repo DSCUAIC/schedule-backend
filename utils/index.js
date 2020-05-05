@@ -52,17 +52,17 @@ exports.getSchedule = async path => {
 
 exports.filterSchedule = ({ schedule, year, group, semiyear, room, day }) => {
   return schedule.years.filter(y => {
-    if (year && y.year !== parseInt(year)) {
+    if (year && !year.includes(y.year.toString())) {
       return false
     }
 
     y.days = y.days.filter(d => {
-      if (day && d.name !== day) {
+      if (day && !day.includes(d.name)) {
         return false
       }
 
       d.courses = d.courses.filter(course => {
-        if (room && course.room !== room) {
+        if (room && !room.includes(course.room)) {
           return false
         }
 
@@ -78,16 +78,16 @@ exports.filterSchedule = ({ schedule, year, group, semiyear, room, day }) => {
               return true
             }
 
-            return c === semiyear
+            return semiyear.includes(c)
           }
 
           if (c.length === 2) {
             if (semiyear && group) {
-              return c[0] === semiyear && c[1] === group
+              return semiyear.includes(c[0]) && group.includes(c[1])
             } else if (semiyear) {
-              return c[0] === semiyear
+              return semiyear.includes(c[0])
             } else if (group) {
-              return c[1] === group
+              return group.includes(c[1])
             }
           }
         })

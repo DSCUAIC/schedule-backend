@@ -309,13 +309,25 @@ exports.getGroupSchedule = async (req, res) => {
 
 exports.getScheduleWithParams = async (req, res) => {
   try {
-    const { faculty, semester, year, group, semiyear, room, day } = req.query
+    let { faculty, semester, year, group, semiyear, room, day } = req.query
+
+    year = year ? year.split(',') : undefined
+    group = group ? group.split(',') : undefined
+    semiyear = semiyear ? semiyear.split(',') : undefined
+    room = room ? room.split(',') : undefined
+    day = day ? day.split(',') : undefined
 
     const q = { shortName: faculty || 'FII' }
 
     const excluded = {}
 
     if (semester) {
+      if (!['1', '2'].includes(semester)) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          message: 'Invalid semester'
+        })
+      }
       excluded[`sem${3 - semester}Schedule`] = 0
     }
 

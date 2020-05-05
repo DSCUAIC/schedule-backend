@@ -15,7 +15,7 @@
     "prod:default": "NODE_ENV=prod node index.js",
     "depcheck": "depcheck . --ignores=eslint",
     "lint": "standard",
-    "test": "jest",
+    "test": "jest tests/schedule",
     "test-coverage": "jest --coverage"
   },
   "repository": {
