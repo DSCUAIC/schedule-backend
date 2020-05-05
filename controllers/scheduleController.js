@@ -307,16 +307,6 @@ exports.getGroupSchedule = async (req, res) => {
   }
 }
 
-const daysRo = {
-  1: 'Luni',
-  2: 'Marti',
-  3: 'Miercuri',
-  4: 'Joi',
-  5: 'Vineri',
-  6: 'Sambata',
-  7: 'Duminica'
-}
-
 exports.getScheduleWithParams = async (req, res) => {
   try {
     const { faculty, semester, year, group, semiyear, room, day } = req.query
