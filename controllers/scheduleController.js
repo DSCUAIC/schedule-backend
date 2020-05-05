@@ -1,5 +1,5 @@
 const HttpStatus = require('http-status-codes')
-const { getSchedule } = require('../utils')
+const { getSchedule, filterSchedule } = require('../utils')
 
 exports.getProfessorSchedule = async (req, res) => {
   try {
@@ -272,8 +272,13 @@ exports.getGroupSchedule = async (req, res) => {
     for (const [weekDay, weekDaySchedule] of Object.entries(
       schedule[yearNumber]
     )) {
-      const weekDayClasses = weekDaySchedule.filter(weekDayClass =>
-        (weekDayClass.Tip === 'Curs' && weekDayClass.Grupa.indexOf(groupName.substring(0, groupName.length - 1)) !== -1) || weekDayClass.Grupa.indexOf(groupName) !== -1
+      const weekDayClasses = weekDaySchedule.filter(
+        weekDayClass =>
+          (weekDayClass.Tip === 'Curs' &&
+            weekDayClass.Grupa.indexOf(
+              groupName.substring(0, groupName.length - 1)
+            ) !== -1) ||
+          weekDayClass.Grupa.indexOf(groupName) !== -1
       )
       classes[weekDay] = weekDayClasses
 
@@ -302,281 +307,65 @@ exports.getGroupSchedule = async (req, res) => {
   }
 }
 
-const daysRo = {
-  1: 'Luni',
-  2: 'Marti',
-  3: 'Miercuri',
-  4: 'Joi',
-  5: 'Vineri',
-  6: 'Sambata',
-  7: 'Duminica'
-}
-
 exports.getScheduleWithParams = async (req, res) => {
   try {
-    const schedule = await getSchedule('./data/schedule.json')
-    const schedule2 = await getSchedule('./data/schedule2.json')
+    let { faculty, semester, year, group, semiyear, room, day } = req.query
 
-    const { faculty, semester, year, group, semiyear, room } = req.query
-    let dayNum = req.query.day
+    year = year ? year.split(',') : undefined
+    group = group ? group.split(',') : undefined
+    semiyear = semiyear ? semiyear.split(',') : undefined
+    room = room ? room.split(',') : undefined
+    day = day ? day.split(',') : undefined
 
-    // if no params send the entire schedule
-    if (!faculty && !semester && !year && !dayNum && !group && !semiyear && !room) {
-      return res.status(HttpStatus.OK).json({
-        success: true,
-        schedule: {
-          FII: {
-            sem1: schedule,
-            sem2: schedule2
-          }
-        }
-      })
-    }
+    const q = { shortName: faculty || 'FII' }
 
-    // temporary until the new schedule structure
-    if (faculty && faculty !== 'FII') {
-      return res.status(HttpStatus.OK).json({
-        success: true,
-        schedule: null
-      })
-    }
+    const excluded = {}
 
-    let ret = {}
-    ret.FII = {
-      sem1: schedule,
-      sem2: schedule2
-    }
-
-    // filters the semester
     if (semester) {
-      if (semester !== '1' && semester !== '2') {
-        return res.status(HttpStatus.NOT_FOUND).json({
+      if (!['1', '2'].includes(semester)) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
           success: false,
-          message: 'Invalid semester number'
+          message: 'Invalid semester'
         })
       }
-      if (semester === '1') {
-        for (const fac in ret) {
-          delete ret[fac].sem2
-        }
-      } else {
-        for (const fac in ret) {
-          delete ret[fac].sem1
-        }
-      }
+      excluded[`sem${3 - semester}Schedule`] = 0
     }
 
-    // filters the year
-    if (year) {
-      const years = year.split(',')
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          for (const y in ret[fac][sem]) {
-            if (!years.includes(y)) {
-              delete ret[fac][sem][y]
-            }
-          }
-          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
-        }
-        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
-      }
-      if (Object.keys(ret).length === 0) {
-        return res.status(HttpStatus.OK).json({
-          success: true,
-          schedule: null
-        })
-      }
+    const schedule = await req.db.Faculty.findOne(q, excluded)
+
+    if (!schedule) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: 'Invalid query'
+      })
     }
 
-    // filters the day
-    if (dayNum) {
-      const days = dayNum.split(',')
-      const daysText = []
-      for (let index = 0; index < days.length; index++) {
-        if (daysRo[days[index]] === undefined) {
-          days.splice(index, 1)
-          index--
-        } else {
-          daysText.push(daysRo[days[index]])
-        }
-      }
-      if (days.length === 0) {
-        dayNum = ''
-      } else {
-        for (const fac in ret) {
-          for (const sem in ret[fac]) {
-            for (const y in ret[fac][sem]) {
-              for (const d in ret[fac][sem][y]) {
-                if (!daysText.includes(d)) {
-                  delete ret[fac][sem][y][d]
-                }
-              }
-              if (Object.keys(ret[fac][sem][y]).length === 0) { delete ret[fac][sem][y] }
-            }
-            if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
-          }
-          if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
-        }
-        if (Object.keys(ret).length === 0) {
-          return res.status(HttpStatus.OK).json({
-            success: true,
-            schedule: null
-          })
-        }
-      }
+    if (schedule.sem1Schedule) {
+      schedule.sem21chedule.years = filterSchedule({
+        schedule: schedule.sem1Schedule,
+        year,
+        group,
+        semiyear,
+        room,
+        day
+      })
     }
 
-    // filters the semiyear
-    if (semiyear) {
-      const semiyears = semiyear.split(',')
-
-      // first healthy check
-      for (const i in semiyears) {
-        if (semiyears[i] !== 'A' && semiyears[i] !== 'B' && semiyears[i] !== 'E') {
-          return res.status(HttpStatus.BAD_REQUEST).json({
-            success: false,
-            message: 'Bad semiyear provided. Only A, B and E are accepted, with a comma to separate them if the case.'
-          })
-        }
-      }
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          for (const year in ret[fac][sem]) {
-            for (const day in ret[fac][sem][year]) {
-              ret[fac][sem][year][day] = ret[fac][sem][year][day].filter(course => {
-                for (const y in semiyears) {
-                  if (course.Grupa.indexOf(semiyears[y]) !== -1) { return true }
-                }
-                return false
-              })
-              if (ret[fac][sem][year][day].length === 0) { delete ret[fac][sem][year][day] }
-            }
-            if (Object.keys(ret[fac][sem][year]).length === 0) { delete ret[fac][sem][year] }
-          }
-          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
-        }
-        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
-      }
-      if (Object.keys(ret).length === 0) {
-        return res.send(HttpStatus.OK).json({
-          success: true,
-          schedule: null
-        })
-      }
+    if (schedule.sem2Schedule) {
+      schedule.sem2Schedule.years = filterSchedule({
+        schedule: schedule.sem2Schedule,
+        year,
+        group,
+        semiyear,
+        room,
+        day
+      })
     }
 
-    // filters the group
-    if (group) {
-      const groups = group.split(',')
-
-      // check if valid group
-      for (const i in groups) {
-        if (isNaN(groups[i])) {
-          return res.status(HttpStatus.BAD_REQUEST).json({
-            success: false,
-            message: 'Bad group number provided. Only numbers are allowed.'
-          })
-        }
-      }
-
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          for (const year in ret[fac][sem]) {
-            for (const day in ret[fac][sem][year]) {
-              ret[fac][sem][year][day] = ret[fac][sem][year][day].filter(course => {
-                for (const y in groups) {
-                  if (course.Grupa.indexOf('A' + groups[y]) !== -1 || course.Grupa.indexOf('B' + groups[y]) !== -1 || course.Grupa.indexOf('E' + groups[y]) !== -1 || course.Tip === 'Curs') { return true }
-                }
-                return false
-              })
-              if (ret[fac][sem][year][day].length === 0) { delete ret[fac][sem][year][day] }
-            }
-            if (Object.keys(ret[fac][sem][year]).length === 0) { delete ret[fac][sem][year] }
-          }
-          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
-        }
-        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
-      }
-      if (Object.keys(ret).length === 0) {
-        return res.send(HttpStatus.OK).json({
-          success: true,
-          schedule: null
-        })
-      }
-    }
-
-    // filters the room
-    if (room) {
-      const rooms = room.split(',')
-
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          for (const year in ret[fac][sem]) {
-            for (const day in ret[fac][sem][year]) {
-              ret[fac][sem][year][day] = ret[fac][sem][year][day].filter(course => {
-                for (const y in rooms) {
-                  if (course.Sala.indexOf(rooms[y]) !== -1) { return true }
-                }
-                return false
-              })
-              if (ret[fac][sem][year][day].length === 0) { delete ret[fac][sem][year][day] }
-            }
-            if (Object.keys(ret[fac][sem][year]).length === 0) { delete ret[fac][sem][year] }
-          }
-          if (Object.keys(ret[fac][sem]).length === 0) { delete ret[fac][sem] }
-        }
-        if (Object.keys(ret[fac]).length === 0) { delete ret[fac] }
-      }
-      if (Object.keys(ret).length === 0) {
-        return res.status(HttpStatus.OK).json({
-          success: true,
-          schedule: null
-        })
-      }
-    }
-
-    // removes day key from ret if parameter is set and doesn't contain a comma
-    if (dayNum && dayNum.split(',').length === 1) {
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          for (const y in ret[fac][sem]) {
-            ret[fac][sem][y] = ret[fac][sem][y][daysRo[dayNum]]
-          }
-        }
-      }
-    }
-
-    // removes year key from ret if parameter is set and doesn't contain a comma
-    if (year && year.split(',').length === 1) {
-      for (const fac in ret) {
-        for (const sem in ret[fac]) {
-          ret[fac][sem] = ret[fac][sem][year]
-        }
-      }
-    }
-
-    // removes sem1/2 key from ret if parameter is set
-    if (semester) {
-      if (semester === '1') {
-        for (const fac in ret) {
-          ret[fac] = ret[fac].sem1
-        }
-      } else {
-        for (const fac in ret) {
-          ret[fac] = ret[fac].sem2
-        }
-      }
-    }
-
-    // removes faculty key from ret if parameter is set and doesn't contain a comma
-    if (faculty && faculty.split(',').length === 1) { ret = ret[faculty] }
-
-    return res.status(HttpStatus.OK).json({
-      success: true,
-      schedule: ret
-    })
+    return res.status(HttpStatus.OK).json({ success: true, schedule })
   } catch (error) {
     req.log.error(`Unable to get parameterized schedule -> ${error}`)
+
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'

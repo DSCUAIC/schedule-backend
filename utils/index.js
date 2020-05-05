@@ -49,3 +49,53 @@ exports.getSchedule = async path => {
     return null
   }
 }
+
+exports.filterSchedule = ({ schedule, year, group, semiyear, room, day }) => {
+  return schedule.years.filter(y => {
+    if (year && !year.includes(y.year.toString())) {
+      return false
+    }
+
+    y.days = y.days.filter(d => {
+      if (day && !day.includes(d.name)) {
+        return false
+      }
+
+      d.courses = d.courses.filter(course => {
+        if (room && !room.includes(course.room)) {
+          return false
+        }
+
+        const groups = course.group.split(' , ').map(c => c.slice(2))
+
+        return groups.some(c => {
+          if (!c.length || (!group && !semiyear)) {
+            return true
+          }
+
+          if (c.length === 1) {
+            if (!semiyear) {
+              return true
+            }
+
+            return semiyear.includes(c)
+          }
+
+          if (c.length === 2) {
+            if (semiyear && group) {
+              return semiyear.includes(c[0]) && group.includes(c[1])
+            } else if (semiyear) {
+              return semiyear.includes(c[0])
+            } else if (group) {
+              return group.includes(c[1])
+            }
+          }
+        })
+      })
+
+      return true
+    })
+
+    return true
+  })
+}

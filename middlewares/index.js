@@ -69,9 +69,9 @@ exports.requireAuth = () => {
         message: 'You must have an authorization token'
       })
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
-        message: 'Something bad happened!'
+        message: error.message
       })
     }
   }
