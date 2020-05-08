@@ -185,8 +185,8 @@ exports.getYearSchedule = async (req, res) => {
   try {
     const yearNumber = parseInt(req.params.yearNumber)
 
-    const schedule1 = await req.db.Schedule.findOne({semester: 1})
-    const schedule2 = await req.db.Schedule.findOne({semester: 2})
+    const schedule1 = await req.db.Schedule.findOne({ semester: 1 })
+    const schedule2 = await req.db.Schedule.findOne({ semester: 2 })
 
     if (!schedule1.years[yearNumber - 1] && !schedule2.years[yearNumber - 1]) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -222,7 +222,6 @@ exports.getYearSchedule = async (req, res) => {
     for (const year of schedule2.years) {
       if (yearNumber === year.year) {
         sem2[year.year] = {}
-
         for (const day of year.days) {
           sem2[year.year][day.name] = []
 
@@ -231,18 +230,17 @@ exports.getYearSchedule = async (req, res) => {
           }
           if (sem2[year.year][day.name].length === 0) {
             delete sem2[year.year][day.name]
-          } 
+          }
         }
-        
         if (Object.keys(sem2[year.year]).length === 0) {
-         delete sem2[year.year]
+          delete sem2[year.year]
         }
       }
     }
 
     return res.status(HttpStatus.OK).json({
       success: true,
-      schedule1: { 
+      schedule1: {
         sem1,
         sem2
       }
