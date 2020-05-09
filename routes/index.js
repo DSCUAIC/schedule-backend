@@ -9,8 +9,6 @@ const jwtAuth = require('jwt-auth-middleware')
 const Cryptr = require('cryptr')
 const db = require('../models')
 
-const { requireAuth } = require('../middlewares')
-
 router.get('/', (req, res) => {
   return res.status(HttpStatus.OK).json({
     status: 'active'
@@ -19,10 +17,9 @@ router.get('/', (req, res) => {
 
 router.use('/auth', auth)
 
-db.Secret.findOne({env: process.env.NODE_ENV, key: "JWT_KEY"}, (err, secret) => {
-
-  if(err) return handleError(err)
-  key = new Cryptr(process.env.SECRET_KEY).decrypt(secret.value)
+db.Secret.findOne({ env: process.env.NODE_ENV, key: 'JWT_KEY' }, (err, secret) => {
+  if (err) return console.log(err)
+  const key = new Cryptr(process.env.SECRET_KEY).decrypt(secret.value)
   router.use(jwtAuth.requireAuth(key))
 })
 
