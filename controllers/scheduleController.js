@@ -246,44 +246,47 @@ exports.getYearSemesterSchedule = async (req, res) => {
 
 exports.getGroupSchedule = async (req, res) => {
   try {
-    const { yearNumber, semesterNumber, groupName } = req.params
+    let { yearNumber, semesterNumber, groupName } = req.params
 
-    if (!['1', '2'].includes(semesterNumber)) {
+    yearNumber = parseInt(yearNumber)
+    semesterNumber = parseInt(semesterNumber)
+
+    if (semesterNumber !== 1 && semesterNumber !== 2) {
       return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: 'Invalid semester number'
       })
     }
 
-    const schedule = await getSchedule(
-      `./data/schedule${semesterNumber === '1' ? '' : '2'}.json`
-    )
-
-    if (!schedule[yearNumber]) {
+    const schedule = await req.db.Schedule.findOne({ semester: semesterNumber })
+    if (!schedule.years[yearNumber - 1]) {
       return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: 'Invalid year number'
       })
     }
 
+    groupName = 'I'.concat(yearNumber.toString(), groupName)
     const classes = {}
     let isGroupNameValid = false
-
-    for (const [weekDay, weekDaySchedule] of Object.entries(
-      schedule[yearNumber]
-    )) {
-      const weekDayClasses = weekDaySchedule.filter(
-        weekDayClass =>
-          (weekDayClass.Tip === 'Curs' &&
-            weekDayClass.Grupa.indexOf(
-              groupName.substring(0, groupName.length - 1)
-            ) !== -1) ||
-          weekDayClass.Grupa.indexOf(groupName) !== -1
-      )
-      classes[weekDay] = weekDayClasses
-
-      if (!isGroupNameValid && weekDayClasses.length > 0) {
-        isGroupNameValid = true
+    const year = schedule.years[yearNumber - 1]
+    for (var day of year.days) {
+      classes[day.name] = []
+      for (var course of day.courses) {
+        if (course.group === groupName) {
+          classes[day.name].push({
+            from: course.from,
+            to: course.to,
+            group: groupName,
+            discipline: course.discipline,
+            professor: course.professor,
+            room: course.room,
+            frequency: course.frequency,
+            package: course.package,
+            type: course.type
+          })
+          isGroupNameValid = true
+        }
       }
     }
 
