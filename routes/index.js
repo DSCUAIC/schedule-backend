@@ -5,7 +5,7 @@ const users = require('./users')
 const auth = require('./auth')
 const schedule = require('./schedule')
 const secrets = require('./secrets')
-const jwtAuth = require('jwt-auth-middleware')
+const {requireAuth} = require('jwt-auth-middleware')
 const Cryptr = require('cryptr')
 const db = require('../models')
 
@@ -20,7 +20,7 @@ router.use('/auth', auth)
 db.Secret.findOne({ env: process.env.NODE_ENV, key: 'JWT_KEY' }, (err, secret) => {
   if (err) return console.log(err)
   const key = new Cryptr(process.env.SECRET_KEY).decrypt(secret.value)
-  router.use(jwtAuth.requireAuth(key))
+  router.use(requireAuth(key))
 })
 
 router.use('/users', users)
