@@ -246,7 +246,17 @@ exports.getYearSemesterSchedule = async (req, res) => {
 
 exports.getGroupSchedule = async (req, res) => {
   try {
-    const { yearNumber, semesterNumber, groupName } = req.params
+    const {
+      facultyShortName,
+      yearNumber,
+      semesterNumber,
+      groupName
+    } = req.params
+
+    const semiyear = groupName[0]
+    const group = groupName[1]
+
+    const q = { shortName: facultyShortName || 'FII' }
 
     if (!['1', '2'].includes(semesterNumber)) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -255,49 +265,46 @@ exports.getGroupSchedule = async (req, res) => {
       })
     }
 
-    const schedule = await getSchedule(
-      `./data/schedule${semesterNumber === '1' ? '' : '2'}.json`
-    )
+    const excluded = {}
 
-    if (!schedule[yearNumber]) {
-      return res.status(HttpStatus.NOT_FOUND).json({
-        success: false,
-        message: 'Invalid year number'
-      })
-    }
-
-    const classes = {}
-    let isGroupNameValid = false
-
-    for (const [weekDay, weekDaySchedule] of Object.entries(
-      schedule[yearNumber]
-    )) {
-      const weekDayClasses = weekDaySchedule.filter(
-        weekDayClass =>
-          (weekDayClass.Tip === 'Curs' &&
-            weekDayClass.Grupa.indexOf(
-              groupName.substring(0, groupName.length - 1)
-            ) !== -1) ||
-          weekDayClass.Grupa.indexOf(groupName) !== -1
-      )
-      classes[weekDay] = weekDayClasses
-
-      if (!isGroupNameValid && weekDayClasses.length > 0) {
-        isGroupNameValid = true
+    if (semesterNumber) {
+      if (!['1', '2'].includes(semesterNumber)) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          message: 'Invalid semester'
+        })
       }
+      excluded[`sem${3 - semesterNumber}Schedule`] = 0
     }
 
-    if (!isGroupNameValid) {
-      return res.status(HttpStatus.NOT_FOUND).json({
+    const schedule = await req.db.Faculty.findOne(q, excluded)
+
+    if (!schedule) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
-        message: 'Invalid group name'
+        message: 'Invalid query'
       })
     }
 
-    return res.status(HttpStatus.OK).json({
-      success: true,
-      schedule: classes
-    })
+    if (schedule.sem1Schedule) {
+      schedule.sem21chedule.years = filterSchedule({
+        schedule: schedule.sem1Schedule,
+        year: yearNumber,
+        group,
+        semiyear
+      })
+    }
+
+    if (schedule.sem2Schedule) {
+      schedule.sem2Schedule.years = filterSchedule({
+        schedule: schedule.sem2Schedule,
+        year: yearNumber,
+        group,
+        semiyear
+      })
+    }
+
+    return res.status(HttpStatus.OK).json({ success: true, schedule })
   } catch (error) {
     req.log.error(`Unable to get group schedule -> ${error}`)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
