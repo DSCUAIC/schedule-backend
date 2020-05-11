@@ -5,7 +5,7 @@ const users = require('./users')
 const auth = require('./auth')
 const schedule = require('./schedule')
 const secrets = require('./secrets')
-const {requireAuth} = require('jwt-auth-middleware')
+const { requireAuth } = require('jwt-auth-middleware')
 const Cryptr = require('cryptr')
 const db = require('../models')
 
