@@ -341,7 +341,7 @@ exports.getScheduleWithParams = async (req, res) => {
     }
 
     if (schedule.sem1Schedule) {
-      schedule.sem21chedule.years = filterSchedule({
+      schedule.sem1Schedule.years = filterSchedule({
         schedule: schedule.sem1Schedule,
         year,
         group,
