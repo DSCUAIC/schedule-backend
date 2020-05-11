@@ -89,9 +89,8 @@ exports.getProfessorSchedule = async (req, res) => {
 
 exports.getRoomSchedule = async (req, res) => {
   try {
-    const schedule1 = await req.db.Schedule.findOne( {semester: 1});
-    const schedule2 = await req.db.Schedule.findOne( {semester: 2});
-    years = schedule1.years;
+    const schedule1 = await req.db.Schedule.findOne({ semester: 1 })
+    const schedule2 = await req.db.Schedule.findOne({ semester: 2 })
     const { r } = req.query
 
     if (!r) {
@@ -102,20 +101,18 @@ exports.getRoomSchedule = async (req, res) => {
       })
     }
 
-    const rooms = r ? r.split(','):undefined
+    const rooms = r ? r.split(',') : undefined
     const sem1 = {}
     const sem2 = {}
 
     for (const year of schedule1.years) {
-      
       sem1[year.year] = {}
 
       for (const day of year.days) {
         sem1[year.year][day.name] = []
-        
+
         for (const course of day.courses) {
-          if (rooms.indexOf(course.room) > -1) 
-            sem1[year.year][day.name].push(course);
+          if (rooms.indexOf(course.room) > -1) { sem1[year.year][day.name].push(course) }
         }
 
         if (sem1[year.year][day.name].length === 0) {
@@ -129,15 +126,13 @@ exports.getRoomSchedule = async (req, res) => {
     }
 
     for (const year of schedule2.years) {
-      
       sem2[year.year] = {}
 
       for (const day of year.days) {
         sem2[year.year][day.name] = []
-        
+
         for (const course of day.courses) {
-          if (rooms.indexOf(course.room) > -1) 
-            sem2[year.year][day.name].push(course);
+          if (rooms.indexOf(course.room) > -1) { sem2[year.year][day.name].push(course) }
         }
 
         if (sem2[year.year][day.name].length === 0) {
