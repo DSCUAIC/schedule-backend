@@ -183,21 +183,67 @@ exports.getRoomSchedule = async (req, res) => {
 
 exports.getYearSchedule = async (req, res) => {
   try {
-    const { yearNumber } = req.params
+    const yearNumber = parseInt(req.params.yearNumber)
 
-    const schedule = await getSchedule('./data/schedule.json')
-    const schedule2 = await getSchedule('./data/schedule2.json')
+    const schedule1 = await req.db.Schedule.findOne({ semester: 1 })
+    const schedule2 = await req.db.Schedule.findOne({ semester: 2 })
 
-    if (!schedule[yearNumber] && !schedule2[yearNumber]) {
+    if (!schedule1.years[yearNumber - 1] && !schedule2.years[yearNumber - 1]) {
       return res.status(HttpStatus.NOT_FOUND).json({
         success: false,
         message: 'Invalid year number'
       })
     }
 
+    const sem1 = {}
+    for (const year of schedule1.years) {
+      if (yearNumber === year.year) {
+        sem1[year.year] = {}
+
+        for (const day of year.days) {
+          sem1[year.year][day.name] = []
+
+          for (const course of day.courses) {
+            sem1[year.year][day.name].push(course)
+          }
+
+          if (sem1[year.year][day.name].length === 0) {
+            delete sem1[year.year][day.name]
+          }
+        }
+
+        if (Object.keys(sem1[year.year]).length === 0) {
+          delete sem1[year.year]
+        }
+      }
+    }
+
+    const sem2 = {}
+    for (const year of schedule2.years) {
+      if (yearNumber === year.year) {
+        sem2[year.year] = {}
+        for (const day of year.days) {
+          sem2[year.year][day.name] = []
+
+          for (const course of day.courses) {
+            sem2[year.year][day.name].push(course)
+          }
+          if (sem2[year.year][day.name].length === 0) {
+            delete sem2[year.year][day.name]
+          }
+        }
+        if (Object.keys(sem2[year.year]).length === 0) {
+          delete sem2[year.year]
+        }
+      }
+    }
+
     return res.status(HttpStatus.OK).json({
       success: true,
-      schedule: { sem1: schedule[yearNumber], sem2: schedule2[yearNumber] }
+      schedule1: {
+        sem1,
+        sem2
+      }
     })
   } catch (error) {
     req.log.error(`Unable to get year schedule -> ${error}`)
@@ -341,7 +387,7 @@ exports.getScheduleWithParams = async (req, res) => {
     }
 
     if (schedule.sem1Schedule) {
-      schedule.sem21chedule.years = filterSchedule({
+      schedule.sem1Schedule.years = filterSchedule({
         schedule: schedule.sem1Schedule,
         year,
         group,
