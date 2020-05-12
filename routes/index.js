@@ -16,9 +16,9 @@ router.get('/', (req, res) => {
 })
 
 router.use('/auth', auth)
-router.use('/share', share)
 router.use(requireAuth())
 
+router.use('/share', share)
 router.use('/users', users)
 router.use('/schedule', schedule)
 router.use('/secrets', secrets)

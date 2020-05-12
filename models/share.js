@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose')
 
 const shareSchema = new Schema(
   {
-    owner: {
+    ownerId: {
       type: String,
       required: true
     },
