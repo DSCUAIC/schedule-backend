@@ -48,6 +48,11 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
+    favoriteCourses:
+    {
+      type: Array,
+      default: []
+    },
     profileImage: {
       id: {
         type: String,
