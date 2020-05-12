@@ -89,79 +89,59 @@ exports.getProfessorSchedule = async (req, res) => {
 
 exports.getRoomSchedule = async (req, res) => {
   try {
-    const schedule = await getSchedule('./data/schedule.json')
-    const schedule2 = await getSchedule('./data/schedule2.json')
-
+    const schedule1 = await req.db.Schedule.findOne({ semester: 1 })
+    const schedule2 = await req.db.Schedule.findOne({ semester: 2 })
     const { r } = req.query
 
     if (!r) {
       return res.status(HttpStatus.OK).json({
         success: true,
-        schedule
+        schedule1,
+        schedule2
       })
     }
 
-    const rooms = r.split(',')
+    const rooms = r ? r.split(',') : undefined
     const sem1 = {}
     const sem2 = {}
 
-    if (schedule) {
-      for (const year in schedule) {
-        for (const day in schedule[year]) {
-          if (!Object.prototype.hasOwnProperty.call(sem1, year)) {
-            sem1[year] = {}
-          }
+    for (const year of schedule1.years) {
+      sem1[year.year] = {}
 
-          sem1[year][day] = Array.prototype.filter.call(
-            schedule[year][day],
-            entry => {
-              for (const room in rooms) {
-                if (entry.Sala === rooms[room]) {
-                  return true
-                }
-              }
-              return false
-            }
-          )
+      for (const day of year.days) {
+        sem1[year.year][day.name] = []
 
-          if (Array.isArray(sem1[year][day]) && sem1[year][day].length === 0) {
-            delete sem1[year][day]
-          }
+        for (const course of day.courses) {
+          if (rooms.indexOf(course.room) > -1) { sem1[year.year][day.name].push(course) }
         }
 
-        if (Object.keys(sem1[year]).length === 0) {
-          delete sem1[year]
+        if (sem1[year.year][day.name].length === 0) {
+          delete sem1[year.year][day.name]
         }
+      }
+
+      if (Object.keys(sem1[year.year]).length === 0) {
+        delete sem1[year.year]
       }
     }
 
-    if (schedule2) {
-      for (const year in schedule2) {
-        for (const day in schedule2[year]) {
-          if (!Object.prototype.hasOwnProperty.call(sem2, year)) {
-            sem2[year] = {}
-          }
+    for (const year of schedule2.years) {
+      sem2[year.year] = {}
 
-          sem2[year][day] = Array.prototype.filter.call(
-            schedule[year][day],
-            entry => {
-              for (const room in rooms) {
-                if (entry.Sala === rooms[room]) {
-                  return true
-                }
-              }
-              return false
-            }
-          )
+      for (const day of year.days) {
+        sem2[year.year][day.name] = []
 
-          if (Array.isArray(sem2[year][day]) && sem2[year][day].length === 0) {
-            delete sem2[year][day]
-          }
+        for (const course of day.courses) {
+          if (rooms.indexOf(course.room) > -1) { sem2[year.year][day.name].push(course) }
         }
 
-        if (Object.keys(sem2[year]).length === 0) {
-          delete sem2[year]
+        if (sem2[year.year][day.name].length === 0) {
+          delete sem2[year.year][day.name]
         }
+      }
+
+      if (Object.keys(sem2[year.year]).length === 0) {
+        delete sem2[year.year]
       }
     }
 
