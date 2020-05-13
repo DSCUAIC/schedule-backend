@@ -244,7 +244,6 @@ exports.getYearSemesterSchedule = async (req, res) => {
         schedule: sem
       })
     }
-
     return res.status(HttpStatus.NOT_FOUND).json({
       success: false,
       message: 'Invalid semester number'
