@@ -210,24 +210,38 @@ exports.getYearSchedule = async (req, res) => {
 
 exports.getYearSemesterSchedule = async (req, res) => {
   try {
-    const { yearNumber, semesterNumber } = req.params
-    if (semesterNumber === '1' || semesterNumber === '2') {
-      let pathToSchedule = './data/schedule.json'
-
-      if (semesterNumber === '2') pathToSchedule = './data/schedule2.json'
-
-      const schedule = await getSchedule(pathToSchedule)
-
-      if (!schedule[yearNumber]) {
+    const yearNumber = parseInt(req.params.yearNumber)
+    const semesterNumber = parseInt(req.params.semesterNumber)
+    if (semesterNumber === 1 || semesterNumber === 2) {
+      const schedule = await req.db.Schedule.findOne({ semester: semesterNumber })
+      if (!schedule.years[yearNumber - 1]) {
         return res.status(HttpStatus.NOT_FOUND).json({
           success: false,
           message: 'Invalid year number'
         })
       }
+      const sem = {}
 
+      for (const year of schedule.years) {
+        if (yearNumber === year.year) {
+          sem[year.year] = {}
+          for (const day of year.days) {
+            sem[year.year][day.name] = []
+            for (const course of day.courses) {
+              sem[year.year][day.name].push(course)
+            }
+            if (sem[year.year][day.name].length === 0) {
+              delete sem[year.year][day.name]
+            }
+          }
+          if (Object.keys(sem[year.year]).length === 0) {
+            delete sem[year.year]
+          }
+        }
+      }
       return res.status(HttpStatus.OK).json({
         success: true,
-        schedule: schedule[yearNumber]
+        schedule: sem
       })
     }
 
